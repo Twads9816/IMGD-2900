@@ -25,7 +25,7 @@ const G = ( function () {
     //////////////////////////////////////////////////////////////////
     //variables for export functions
     let delay = 30; //1/2 second key delay and delay for array playback
-    let cArray = [4, 3, 1]; //stores current array of notes
+    let cArray = [4, 3]; //stores current array of notes
     let nWrong = 0; //stores number of wrong key presses
     let cLvl = 0; //stores current level
     let cPos = 0; //current position in array of notes
@@ -205,7 +205,7 @@ const G = ( function () {
                 }
 
                 //reveal numpad
-                if (sTicks === 4) {
+                if (sTicks === 3) {
                     PS.statusColor(PS.COLOR_WHITE);
                     PS.color(PS.ALL, PS.ALL, PS.COLOR_GRAY_DARK);
                     PS.borderColor(PS.ALL, PS.ALL, PS.COLOR_BLACK);
@@ -213,13 +213,13 @@ const G = ( function () {
                 }
 
                 //fade to play board
-                if (sTicks === 7) {
+                if (sTicks === 6) {
                     PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_GRAY_DARK);
                     PS.borderColor(PS.ALL, PS.ALL, PS.COLOR_GRAY_LIGHT);
                 }
 
                 //start tutorial, remove glyphs, remove status text
-                if (sTicks === 9) {
+                if (sTicks === 8) {
                     PS.timerStop(sTimer);
 
                     PS.statusText("");
@@ -315,23 +315,28 @@ const G = ( function () {
         //generates a new array of notes for current level
 
         newNotes : function() {
-            if (cLvl < 3 || cLvl === 3) {
-                delay--;
-                cArray = [PS.random(9), PS.random(9), PS.random(9)];
-            }
-            else if (cLvl === 11) {
+            if (cLvl === 11) {
                 return;
             }
+            if (cLvl === 1) {
+                cArray = [PS.random(9), PS.random(9)];
+            }
             else {
-                delay -= 2;
-                if (cRand) {
-                    let array = [];
-                    for (var i = 0; i < cLvl; i++) {
-                        array.push(PS.random(9));
-                    }
-                    cArray = array;
+                if (cLvl > 1 && cLvl < 5) {
+                    delay--;
+                    cArray.push(PS.random(9));
                 }
-                else cArray.push(PS.random(9));
+                else {
+                    delay -= 2;
+                    if (cRand) {
+                        let array = [];
+                        for (var i = 0; i < cLvl; i++) {
+                            array.push(PS.random(9));
+                        }
+                        cArray = array;
+                    }
+                    else cArray.push(PS.random(9));
+                }
             }
         },
 
@@ -348,16 +353,13 @@ const G = ( function () {
 
             function exec() {
                 if (dTicks === 0) {
+                    PS.statusColor(cBGC);
+                    PS.gridColor(cBGC);
                     PS.bgColor(PS.ALL, PS.ALL, PS.COLOR_GRAY_LIGHT);
                 }
 
                 if (dTicks === 1) {
-                    PS.statusColor(cBGC);
-                    PS.gridColor(cBGC);
-                }
-
-                if (dTicks === 2) {
-                    if (cLvl != 11) {
+                    if (cLvl !== 11) {
                         PS.statusText("Level " + cLvl);
                         PS.statusColor(PS.COLOR_BLACK);
                     }
@@ -369,7 +371,7 @@ const G = ( function () {
                     }
                 }
 
-                if (dTicks === 3) {
+                if (dTicks === 2) {
                     G.dNotes();
                     PS.timerStop(dTimer);
                 }
@@ -400,6 +402,7 @@ const G = ( function () {
                 }
                 else {
                     G.activate();
+                    PS.bgColor(PS.ALL, PS.ALL, PS.COLOR_GRAY_LIGHT);
                     PS.timerStop(dTimer);
                 }
             }
@@ -424,7 +427,7 @@ const G = ( function () {
             pPos = 0;
 
             //darken border as a signifier
-            PS.bgColor(PS.ALL, PS.ALL, PS.COLOR_GRAY_DARK);
+            //PS.bgColor(PS.ALL, PS.ALL, PS.COLOR_GRAY_DARK);
 
             //allow input
             active =  true;
@@ -447,6 +450,7 @@ const G = ( function () {
 
             PS.gridFade(20, { rgb : PS.COLOR_RED});
             PS.gridColor(cBGC);
+            PS.bgColor(PS.ALL, PS.ALL, PS.COLOR_GRAY_DARK);
 
             //flags
             pPos = 0;
@@ -455,7 +459,7 @@ const G = ( function () {
             active = false;
 
             if (nWrong === 3 && !tutorial) {
-                PS.audioPlay("fx_bloink")
+                PS.audioPlay("fx_bloink");
                 cLvl = 0;
                 delay = 30;
                 G.loadNext();

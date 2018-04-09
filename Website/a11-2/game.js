@@ -455,7 +455,7 @@ const G = ( function () {
             active = false;
 
             if (nWrong === 3 && !tutorial) {
-                PS.audioPlay("fx_bloink")
+                PS.audioPlay("fx_bloink");
                 cLvl = 0;
                 delay = 30;
                 G.loadNext();
