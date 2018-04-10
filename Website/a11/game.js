@@ -25,17 +25,15 @@ const G = ( function () {
     //////////////////////////////////////////////////////////////////
     //variables for export functions
     let delay = 30; //1/2 second key delay and delay for array playback
-    let cArray = [4, 3]; //stores current array of notes
+    let cArray = [1, 6]; //stores current array of notes
     let nWrong = 0; //stores number of wrong key presses
     let cLvl = 0; //stores current level
     let cPos = 0; //current position in array of notes
     let pPos = 0; //player position in array
-    let preset = 1; //keeps track of current preset
     let ticks = 0; //remembers ticks of global function
     let complete = false; //flag signaling movement to next level
     let active = false; //flags whether game is ready to accept input
     let cBGC = PS.COLOR_WHITE; //stores the current background color
-    let lvlTries = 0; //tries before game resets to level 1
     let tutorial = true; //tutorial flag
 
     //////////////////////////////////////////////////////////////////
@@ -450,6 +448,15 @@ const G = ( function () {
 
             PS.gridFade(20, { rgb : PS.COLOR_RED});
             PS.gridColor(cBGC);
+
+            if (nWrong > 3 && !tutorial) {
+                PS.audioPlay("fx_bloink");
+                cLvl = 0;
+                delay = 30;
+                G.loadNext();
+                return;
+            }
+
             PS.bgColor(PS.ALL, PS.ALL, PS.COLOR_GRAY_DARK);
 
             //flags
@@ -457,14 +464,6 @@ const G = ( function () {
             cPos = 0;
             nWrong++;
             active = false;
-
-            if (nWrong === 3 && !tutorial) {
-                PS.audioPlay("fx_bloink");
-                cLvl = 0;
-                delay = 30;
-                G.loadNext();
-                return;
-            }
 
             //a/v
             PS.audioPlay("fx_rip");
