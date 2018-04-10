@@ -54,12 +54,6 @@ const G = ( function () {
         0xedc92d
     ];
 
-    //preset data
-    const PRESETS = [
-        [1, "P I A N O", PIANO_COLOR],
-        [2, "S Y N T H", SYNTH_COLOR],
-        [3, "D R U M S", DRUM_COLOR]
-    ];
 
     //array containing all data association for beads
     const BEADS = [
@@ -75,28 +69,6 @@ const G = ( function () {
     ];
 
     //string arrays for audio loading
-    const DRUMS = [
-        "perc_drum_bass",
-        "perc_drum_snare",
-        "perc_drum_tom1",
-        "perc_drum_tom4",
-        "perc_cymbal_crash1",
-        "perc_hihat_closed",
-        "perc_bongo_low",
-        "perc_bongo_high",
-        "perc_triangle"
-    ];
-    const SYNTH = [
-        "fx_squawk",
-        "fx_jump4",
-        "fx_powerup1",
-        "fx_powerup6",
-        "fx_coin1",
-        "fx_pop",
-        "fx_shoot6",
-        "fx_blast4",
-        "fx_tada"
-    ];
     //c major pentatonic scale
     const PIANO = [
         "piano_c4",
@@ -126,9 +98,7 @@ const G = ( function () {
             //////////////////////////////////////////////////////////////////
             //load audio
             for(var i = 0; i < 9; i++) {
-                PS.audioLoad(DRUMS[i]);
-                PS.audioLoad(PIANO[i]);
-                PS.audioLoad(SYNTH[i]);
+               PS.audioLoad(PIANO[i]);
             }
             PS.audioLoad("fx_rip");
             PS.audioLoad("fx_bloink");
