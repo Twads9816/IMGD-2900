@@ -351,12 +351,12 @@ const G = ( function () {
                     PS.bgColor(PS.ALL, PS.ALL, PS.COLOR_GRAY_LIGHT);
                 }
 
-                if (dTicks === 1) {
+                if (dTicks === 2) {
                     PS.statusColor(cBGC);
                     PS.gridColor(cBGC);
                 }
 
-                if (dTicks === 2) {
+                if (dTicks === 4) {
                     if (cLvl != 11) {
                         PS.statusText("Level " + cLvl);
                         PS.statusColor(PS.COLOR_BLACK);
@@ -369,7 +369,7 @@ const G = ( function () {
                     }
                 }
 
-                if (dTicks === 3) {
+                if (dTicks === 6) {
                     G.dNotes();
                     PS.timerStop(dTimer);
                 }

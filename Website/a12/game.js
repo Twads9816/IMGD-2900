@@ -347,7 +347,7 @@ const G = ( function () {
             PS.gridFade(60, {rgb : PS.DEFAULT});
 
 
-            const dTimer = PS.timerStart(60, exec);
+            const dTimer = PS.timerStart(30, exec);
             let dTicks = 0;
 
             function exec() {
@@ -449,6 +449,7 @@ const G = ( function () {
 
             PS.gridFade(20, { rgb : PS.COLOR_RED});
             PS.gridColor(cBGC);
+            active = false;
 
             if (nWrong > 2 && !tutorial) {
                 PS.audioPlay("fx_bloink");
@@ -464,7 +465,6 @@ const G = ( function () {
             pPos = 0;
             cPos = 0;
             nWrong++;
-            active = false;
 
             //a/v
             PS.audioPlay("fx_rip");
