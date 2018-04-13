@@ -40,17 +40,30 @@ PS.init = function( system, options ) {
 
     PS.gridColor(0x000000);
 
- 	PS.statusText( "Wander");
+    PS.bgColor(PS.ALL, PS.ALL, PS.COLOR_GRAY);
+
+ 	PS.bgAlpha(PS.ALL, PS.ALL, 255);
+
+        PS.border(PS.ALL, 15, {
+        left : 0,
+        right : 0
+    });
 
     let width = 1;
     let alpha = 255;
+    let isDepleted = false;
+    let x, y = 15;
 
- 	PS.timerStart(30, exec);
+
+//function for depleting time bar
+ 	PS.timerStart(15, exec);
 
  	function exec() {
-
- 		PS.debug("Right border width: " + PS.border(15, 15, { right : width}).right + "\n");
-        PS.debug("Right alpha: " + PS.alpha(15, 15, alpha) + "\n");
+ 	    if (alpha < 14) {
+ 	        alpha = 0;
+        }
+ 		PS.debug("Right border width: " + PS.border(x, y, { right : width}).right + "\n");
+        PS.debug("Right alpha: " + PS.alpha(x, y, alpha) + "\n");
         if ((alpha - 22) > 0)
         {
             alpha -= 22;
