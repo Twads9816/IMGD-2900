@@ -52,18 +52,25 @@ PS.init = function( system, options ) {
     let width = 1;
     let alpha = 255;
     let isDepleted = false;
-    let x, y = 15;
+    let x = 15;
 
 
 //function for depleting time bar
- 	PS.timerStart(15, exec);
+ 	const timer = PS.timerStart(12, exec);
 
  	function exec() {
  	    if (alpha < 14) {
- 	        alpha = 0;
+            PS.debug("Right alpha: " + PS.alpha(x, 15, 0) + "\n");
+ 	        x--;
+ 	        width = 1;
+ 	        alpha = 255;
         }
- 		PS.debug("Right border width: " + PS.border(x, y, { right : width}).right + "\n");
-        PS.debug("Right alpha: " + PS.alpha(x, y, alpha) + "\n");
+        if (x < 0) {
+ 	        PS.timerStop(timer);
+ 	        return;
+        }
+ 		PS.debug("Right border width: " + PS.border(x, 15, { right : width}).right + "\n");
+        PS.debug("Right alpha: " + PS.alpha(x, 15, alpha) + "\n");
         if ((alpha - 22) > 0)
         {
             alpha -= 22;
