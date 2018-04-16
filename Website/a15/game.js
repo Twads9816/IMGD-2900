@@ -8,24 +8,122 @@
 /*jslint nomen: true, white: true */
 /*global PS */
 
-/*
-This is a template for creating new Perlenspiel games.
-All event-handling functions are commented out by default.
-Uncomment and add code to the event handlers required by your project.
-*/
+const G = (function() {
+    //if level is of correct type, load appropriate data for each bead
+    //level progression is predefined
 
-/*
-PS.init( system, options )
-Called once after engine is initialized but before event-polling begins.
-[system] = an object containing engine and platform information; see API documentation for details.
-[options] = an object with optional parameters; see API documentation for details.
-*/
-
-// Uncomment the following BLOCK to expose PS.init() event handler:
+    /*=========================Consts & Vars=========================*/
+    let time = 30; //progressively decreases as player progresses, giving less time to finish levels
+    let score = 0; //levels completed
 
 
+    /*=========================Process=========================*/
+    /*
+      1. Initiate game
+        a. Associate beads with data for all games
+            i. isPath for drag game. Set through array. Checked by game during play.
+            ii. music files for remember game
+      2. Show menu
+      3. Launch game
+      4. For each level check level type variable in G
+      5. Use level type to dictate what data gets checked and used
 
-PS.init = function( system, options ) {
+    */
+
+    const exports = {
+
+        init: function () {
+            /*=========================Initial Appearance=========================*/
+            //size [MUST BE FIRST]
+            PS.gridSize(16, 16);
+
+            //color
+            PS.gridColor(PS.COLOR_GRAY);
+            PS.color(PS.ALL, PS.ALL, PS.COLOR_GRAY);
+            //PS.bgColor(PS.ALL, PS.ALL, PS.COLOR_GRAY);
+
+            //alpha
+            //PS.bgAlpha(PS.ALL, PS.ALL, 255);
+
+            //text
+            PS.statusText(" ");
+
+            //fade
+            PS.borderFade(PS.ALL, PS.ALL, 60);
+
+            //start game
+            G.start();
+        },
+
+        /*=========================Start Screen=========================*/
+
+        start: function () {
+            //timer
+            const timer = PS.timerStart(30, exec);
+            let ticks = 0;
+
+            function exec() {
+                ticks++;
+                // "Ready...Or...Not"
+                if (ticks === 4) {
+                    PS.statusText("Ready");
+                }
+
+                if (ticks === 6) {
+                    PS.statusText("Or");
+                }
+
+                if (ticks === 8) {
+                    PS.statusText("Not");
+                }
+
+                if (ticks === 10) {
+                    PS.timerStop(timer);
+                }
+            }
+        },
+
+        /*=========================Timer Function=========================*/
+
+        startTimer: function (time) {
+            PS.border(PS.ALL, 15, {
+                left: 0,
+                right: 0
+            });
+
+            let width = 1;
+            let alpha = 255;
+            let x = 15;
+
+            const timer = PS.timerStart(12, exec);
+
+            function exec() {
+                if (alpha < 14) {
+                    PS.debug("Right alpha: " + PS.alpha(x, 15, 0) + "\n");
+                    x--;
+                    width = 1;
+                    alpha = 255;
+                }
+                if (x < 0) {
+                    PS.timerStop(timer);
+                    return;
+                }
+                PS.debug("Right border width: " + PS.border(x, 15, {right: width}).right + "\n");
+                PS.debug("Right alpha: " + PS.alpha(x, 15, alpha) + "\n");
+                if ((alpha - 22) > 0) {
+                    alpha -= 22;
+                }
+                width++;
+            }
+        },
+
+    };
+
+    return exports;
+
+} () );
+
+PS.init = G.init;
 	// Uncomment the following code line to verify operation:
 
 	// PS.debug( "PS.init() called\n" );
@@ -36,28 +134,6 @@ PS.init = function( system, options ) {
 	// The sample call below sets the grid to the default dimensions (8 x 8).
 	// Uncomment the following code line and change the x and y parameters as needed.
 
-	PS.gridSize( 16, 16 );
-
-    PS.gridColor(0x000000);
-
- 	PS.statusText( "Wander");
-
-    let width = 1;
-    let alpha = 255;
-
- 	PS.timerStart(30, exec);
-
- 	function exec() {
-
- 		PS.debug("Right border width: " + PS.border(15, 15, { right : width}).right + "\n");
-        PS.debug("Right alpha: " + PS.alpha(15, 15, alpha) + "\n");
-        if ((alpha - 22) > 0)
-        {
-            alpha -= 22;
-        }
-        width++;
-	}
-
 	// This is also a good place to display your game title or a welcome message
 	// in the status line above the grid.
 	// Uncomment the following code line and change the string parameter as needed.
@@ -65,7 +141,6 @@ PS.init = function( system, options ) {
 	//PS.statusText( "Game" );
 
 	// Add any other initialization code you need here.
-};
 
 
 
@@ -88,10 +163,6 @@ PS.touch = function( x, y, data, options ) {
 
 	//PS.debug( "PS.touch() @ " + x + ", " + y + "\n" );
 	PS.debug( "x = " + x + ", y =" + y + "\n" );
-
-	PS.color(x, y, PS.COLOR_BLUE);
-
-	PS.audioPlay("fx_click");
 
 	// Add code here for mouse clicks/touches over a bead.
 };
