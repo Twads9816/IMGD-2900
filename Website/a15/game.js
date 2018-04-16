@@ -13,6 +13,24 @@ const G = (function() {
     //level progression is predefined
 
     /*=========================Consts & Vars=========================*/
+    const WIDTH = 16, HEIGHT = 16; //width and height of grid
+
+    /*=========================LEVEL FLOW=========================*/
+    //edit to change level progression
+    //each centry contains:
+    []
+    const levels = [
+        [1, "Drag!", false, grid1],
+        [2, "Catch 1!", false],
+        [3, "Remember!", false, notes1],
+        [1, "Drag!", false, grid2],
+        [2, "Don't Catch!", true],
+    ];
+    //current level
+
+
+
+    //variables
     let time = 30; //progressively decreases as player progresses, giving less time to finish levels
     let score = 0; //levels completed
 
@@ -33,6 +51,10 @@ const G = (function() {
     const exports = {
 
         init: function () {
+            /*=========================Consts & Vars=========================*/
+            const size = 3; //outer border width
+            let sum = 0; //sum of x & y for border iterator
+
             /*=========================Initial Appearance=========================*/
             //size [MUST BE FIRST]
             PS.gridSize(16, 16);
@@ -50,6 +72,67 @@ const G = (function() {
 
             //fade
             PS.borderFade(PS.ALL, PS.ALL, 60);
+
+            //borders
+            //get rid of borders
+            PS.border(PS.ALL, PS.ALL, 0);
+            //create outer borders
+            for (let y = 0; y < HEIGHT; y++) {
+                for (let x = 0; x < WIDTH; x++) {
+                    sum = (x + y);
+                    //check for corner cases
+                    if (!sum || sum === 15 || sum === 30) {
+                        //top left corner
+                        if (!sum) {
+                            PS.border(x, y, {
+                                top: size,
+                                left: size
+                            });
+                        }
+                        //top right
+                        if (sum === 15 && x === 15 && !y) {
+                            PS.border(x, y, {
+                                top: size,
+                                right: size
+                            });
+                        }
+                        //bottom left
+                        if (sum === 15 && !x && y === 15) {
+                            PS.border(x, y, {
+                                bottom: size,
+                                left: size
+                            });
+                        }
+                        //bottom right
+                        if (sum === 30) {
+                            PS.border(x, y, {
+                                bottom: size,
+                                right: size
+                            });
+                        }
+                    }
+                    else {
+                        //top
+                        if (!y) {
+                            PS.border(x, y, { top : size});
+                        }
+                        //bottom
+                        if (y === 15) {
+                            PS.border(x, y, { bottom : size});
+                        }
+                        //left
+                        if (x === 0) {
+                            PS.border(x, y, { left : size});
+                        }
+                        //right
+                        if (x === 15) {
+                            PS.border(x, y, { right : size});
+                        }
+
+                    }
+
+                }
+            }
 
             //start game
             G.start();
@@ -77,10 +160,28 @@ const G = (function() {
                     PS.statusText("Not");
                 }
 
+                //reveal border
                 if (ticks === 10) {
+                    PS.borderColor(PS.ALL, PS.ALL, PS.COLOR_BLACK);
+                }
+
+                if (ticks === 12) {
                     PS.timerStop(timer);
+                    G.nextLvl();
                 }
             }
+        },
+
+        /*=========================Load Next Level=========================*/
+
+        nextLvl : function () {
+            //placeholder for coloring the board
+            G.color();
+        },
+
+        /*=========================PLACEHOLDER: Colorize Level=========================*/
+
+        color : function () {
         },
 
         /*=========================Timer Function=========================*/
