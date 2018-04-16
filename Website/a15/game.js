@@ -14,11 +14,21 @@ const G = (function() {
 
     /*=========================Consts & Vars=========================*/
     const WIDTH = 16, HEIGHT = 16; //width and height of grid
+    //arrays for level loading
+    const grid1 = [];
+    const notes1 = [];
+    const grid2 = [];
+
+    //variables
+    let time = 30; //progressively decreases as player progresses, giving less time to finish levels
+    let score = 0; //levels completed
+    let cLvl = 0; //current level
 
     /*=========================LEVEL FLOW=========================*/
-    //edit to change level progression
-    //each centry contains:
-    []
+    /*edit to change level progression
+    each entry contains:
+    [int levelType, string displayText, boolean invertSpecial, array forDrag&Remember
+    */
     const levels = [
         [1, "Drag!", false, grid1],
         [2, "Catch 1!", false],
@@ -26,14 +36,6 @@ const G = (function() {
         [1, "Drag!", false, grid2],
         [2, "Don't Catch!", true],
     ];
-    //current level
-
-
-
-    //variables
-    let time = 30; //progressively decreases as player progresses, giving less time to finish levels
-    let score = 0; //levels completed
-
 
     /*=========================Process=========================*/
     /*
@@ -165,6 +167,7 @@ const G = (function() {
                     PS.borderColor(PS.ALL, PS.ALL, PS.COLOR_BLACK);
                 }
 
+                //start game
                 if (ticks === 12) {
                     PS.timerStop(timer);
                     G.nextLvl();
