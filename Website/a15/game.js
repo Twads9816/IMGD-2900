@@ -31,8 +31,7 @@ const G = (function() {
     //level progression is predefined
 
     /*=========================Consts & Vars=========================*/
-    const WIDTH = 16, HEIGHT = 15; //width and height of grid
-    /*arrays for level loading
+    const WIDTH = 16, HEIGHT = 15; /*width and height of grid arrays for level loading
     16 x 15 to leave room for time bar
      */
     const grid1 = [
@@ -62,6 +61,9 @@ const G = (function() {
     const INVERT = 2;
     const GRID = 3;
     const NOTES = 3;
+    const FAIL = "fx_rip";
+    const SUCCESS = "fx_ding";
+    const TIMEOUT = "fx_whistle";
 
     //variables
     let time = 30; //progressively decreases as player progresses, giving less time to finish levels
@@ -106,10 +108,11 @@ const G = (function() {
         init: function () {
             /*=========================Consts & Vars=========================*/
             const size = 3; //outer border width
-            let sum = 0; //sum of x & y for border iterator
 
             /*=========================Audio Loading=========================*/
-            //PS.audioLoad();
+            PS.audioLoad(FAIL);
+            PS.audioLoad(SUCCESS);
+            PS.audioLoad(TIMEOUT);
 
             /*=========================Initial Appearance=========================*/
             //size [MUST BE FIRST]
@@ -126,7 +129,7 @@ const G = (function() {
             //move back to correct plane
             PS.gridPlane(0);
 
-            /*==========================*/
+            /*==========================================*/
 
             //grid color
             PS.gridColor(PS.COLOR_GRAY);
@@ -147,7 +150,6 @@ const G = (function() {
             //create outer borders
             for (let y = 0; y < HEIGHT; y++) {
                 for (let x = 0; x < WIDTH; x++) {
-                    sum = (x + y);
                     //check for corner cases
                     if ( (!x || x === 15) && (!y || y === 14)) {
                         //top left corner
@@ -179,6 +181,7 @@ const G = (function() {
                             });
                         }
                     }
+                    //lines
                     else {
                         //top
                         if (!y) {
@@ -189,16 +192,14 @@ const G = (function() {
                             PS.border(x, y, { bottom : size});
                         }
                         //left
-                        if (x === 0) {
+                        if (!x) {
                             PS.border(x, y, { left : size});
                         }
                         //right
                         if (x === 15) {
                             PS.border(x, y, { right : size});
                         }
-
                     }
-
                 }
             }
 
@@ -215,11 +216,10 @@ const G = (function() {
             else {
                 finalize();
             }
-
         },
 
         /*=========================Hide Board=========================*/
-
+        //make grid plane 1 opaque
         hide : function () {
             PS.gridPlane(1);
             PS.alpha(PS.ALL, PS.ALL, 255);
@@ -227,7 +227,7 @@ const G = (function() {
         },
 
         /*=========================Show Board=========================*/
-
+        //make grid plane 1 transparent
         show : function () {
             PS.gridPlane(1);
             PS.alpha(PS.ALL, PS.ALL, 0);
@@ -260,11 +260,7 @@ const G = (function() {
                 if (ticks === 10) {
                     PS.statusText("");
                     PS.borderColor(PS.ALL, PS.ALL, PS.COLOR_BLACK);
-                    PS.borderColor(PS.ALL, PS.ALL, {
-                        bottom : PS.COLOR_GRAY,
-                        left : PS.COLOR_GRAY,
-                        right : PS.COLOR_GRAY
-                    });
+                    PS.borderColor(PS.ALL, 15, PS.COLOR_GRAY);
                 }
 
                 //start game
@@ -326,13 +322,13 @@ const G = (function() {
                         PS.statusText(level[1]);
                         break;
 
-                        //reveal board
                     case 2 :
-                        PS.gridPlane(1);
-                        PS.alpha(PS.ALL, PS.ALL, 0);
-                        PS.gridPlane(0);
+                        //reveal grid
+                        G.show();
+                        //allow input
                         active = true;
                         G.startTimer();
+                        break;
 
                 }
             }
@@ -346,7 +342,9 @@ const G = (function() {
         LEAVE MOUSE CHECKING FOR PS.ENTER EVENT HANDLER
          */
         drag : function (level) {
-            PS.gridPlane(0);
+
+
+            //placeholder for inverting level
             if (level[INVERT]) {
 
             }
@@ -396,32 +394,36 @@ const G = (function() {
         startTimer: function (time) {
 
             let width = 1;
-            let alpha = 255;
             let x = 15;
 
-            const timer = PS.timerStart(12, exec);
+            const timer = PS.timerStart(1, exec);
 
             function exec() {
-                if (alpha < 14) {
-                    PS.debug("Right alpha: " + PS.alpha(x, 15, 0) + "\n");
+                if (width >= 17) {
                     x--;
                     width = 1;
-                    alpha = 255;
                 }
                 if (x < 0) {
                     PS.timerStop(timer);
+                    G.timeOut();
                     return;
                 }
-                PS.debug("Right border width: " + PS.border(x, 15, {right: width}).right + "\n");
-                PS.debug("Right alpha: " + PS.alpha(x, 15, alpha) + "\n");
-                if ((alpha - 22) > 0) {
-                    alpha -= 22;
-                }
+                PS.debug("Border width: " + PS.border(x, 15, width) + "\n");
+                PS.debug("Minimum bead size :" + PS.minimum(x, 15) + "\n");
                 width++;
             }
         },
 
+        /*=========================Time Out=========================*/
+        //dictates what happens when time runs out
+
+        timeOut : function() {
+            active = false;
+            PS.audioPlay(TIMEOUT);
+        },
+
         /*=========================Shutdown Protocol=========================*/
+        //make sure to send telemetry before shutdown
         shutdown : function() {
                 if ( db && PS.dbValid( db ) ) {
                     PS.dbEvent( db, "shutdown", true );
@@ -434,6 +436,9 @@ const G = (function() {
             if (active) {
 
             }
+            else {
+                PS.debug("INACTIVE");
+            }
         }
     };
 
@@ -444,7 +449,10 @@ const G = (function() {
 /*=========================External Event Handlers=========================*/
 PS.init = G.init;
 
+PS.touch = G.touch;
+
 PS.shutdown = G.shutdown;
+
 	// Uncomment the following code line to verify operation:
 
 	// PS.debug( "PS.init() called\n" );
