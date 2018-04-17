@@ -8,21 +8,85 @@
 /*jslint nomen: true, white: true */
 /*global PS */
 
+/*=========================Process=========================*/
+/*
+  1. Initiate game
+    a. Associate beads with data for all games
+        i. isPath for drag game. Set through array. Checked by game during play.
+        ii. music files for remember game
+  2. Show menu
+  3. Launch game
+  4. For each level check level type variable in levels array
+  5. Use level type to dictate what data gets checked and used
+    a. Use data level types to dictate how mouse input is used
+*/
+
+/*=========================Testing?=========================*/
+//set to true for user testing
+const test = false;
+
+/*=========================Global Namespace=========================*/
 const G = (function() {
     //if level is of correct type, load appropriate data for each bead
     //level progression is predefined
 
     /*=========================Consts & Vars=========================*/
-    const WIDTH = 16, HEIGHT = 16; //width and height of grid
-    //arrays for level loading
-    const grid1 = [];
+    const WIDTH = 16, HEIGHT = 15; //width and height of grid
+    /*arrays for level loading
+    16 x 15 to leave room for time bar
+     */
+    const grid1 = [
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+    ];
     const notes1 = [];
     const grid2 = [];
+
+    //Named Constants
+    const DRAG = 1;
+    const CATCH = 2;
+    const REMEMBER = 3;
+    const INVERT = 2;
+    const GRID = 3;
+    const NOTES = 3;
 
     //variables
     let time = 30; //progressively decreases as player progresses, giving less time to finish levels
     let score = 0; //levels completed
     let cLvl = 0; //current level
+    let active = false; //flag for allowing input
+
+    /*=========================Telemetry=========================*/
+    /* The db variable below must be in scope for all game code.
+    You can make it global, although that will make Crockford frown.
+    Change its value to a string such as "mygame" to activate the database.
+    The string should contain only letters, digits or underscores, no spaces.
+     */
+
+    let db = null;
+
+    //if testing, set to game name
+    if (test) {
+        db = "PerlenWare"
+    }
+
+    //start game after user input
+    let finalize = function() {
+        G.start();
+    };
 
     /*=========================LEVEL FLOW=========================*/
     /*edit to change level progression
@@ -37,19 +101,6 @@ const G = (function() {
         [2, "Don't Catch!", true],
     ];
 
-    /*=========================Process=========================*/
-    /*
-      1. Initiate game
-        a. Associate beads with data for all games
-            i. isPath for drag game. Set through array. Checked by game during play.
-            ii. music files for remember game
-      2. Show menu
-      3. Launch game
-      4. For each level check level type variable in G
-      5. Use level type to dictate what data gets checked and used
-
-    */
-
     const exports = {
 
         init: function () {
@@ -57,23 +108,38 @@ const G = (function() {
             const size = 3; //outer border width
             let sum = 0; //sum of x & y for border iterator
 
+            /*=========================Audio Loading=========================*/
+            //PS.audioLoad();
+
             /*=========================Initial Appearance=========================*/
             //size [MUST BE FIRST]
             PS.gridSize(16, 16);
 
-            //color
-            PS.gridColor(PS.COLOR_GRAY);
-            PS.color(PS.ALL, PS.ALL, PS.COLOR_GRAY);
-            //PS.bgColor(PS.ALL, PS.ALL, PS.COLOR_GRAY);
+            /*=============Hide Plane Below=============*/
+            PS.gridPlane(1);
 
             //alpha
-            //PS.bgAlpha(PS.ALL, PS.ALL, 255);
+            PS.alpha(PS.ALL, PS.ALL, 255);
+
+            PS.color(PS.ALL, PS.ALL, PS.COLOR_GRAY);
+
+            //move back to correct plane
+            PS.gridPlane(0);
+
+            /*==========================*/
+
+            //grid color
+            PS.gridColor(PS.COLOR_GRAY);
+
+            //minimum bead size to 0
+            PS.minimum(PS.ALL, 15, 0);
 
             //text
-            PS.statusText(" ");
+            PS.statusText("");
 
             //fade
             PS.borderFade(PS.ALL, PS.ALL, 60);
+            PS.fade(PS.ALL, PS.ALL, 60);
 
             //borders
             //get rid of borders
@@ -83,30 +149,30 @@ const G = (function() {
                 for (let x = 0; x < WIDTH; x++) {
                     sum = (x + y);
                     //check for corner cases
-                    if (!sum || sum === 15 || sum === 30) {
+                    if ( (!x || x === 15) && (!y || y === 14)) {
                         //top left corner
-                        if (!sum) {
+                        if (!x && !y) {
                             PS.border(x, y, {
                                 top: size,
                                 left: size
                             });
                         }
                         //top right
-                        if (sum === 15 && x === 15 && !y) {
+                        if (x === 15 && !y) {
                             PS.border(x, y, {
                                 top: size,
                                 right: size
                             });
                         }
                         //bottom left
-                        if (sum === 15 && !x && y === 15) {
+                        if (!x && y === 14) {
                             PS.border(x, y, {
                                 bottom: size,
                                 left: size
                             });
                         }
                         //bottom right
-                        if (sum === 30) {
+                        if (x === 15 && y === 14) {
                             PS.border(x, y, {
                                 bottom: size,
                                 right: size
@@ -119,7 +185,7 @@ const G = (function() {
                             PS.border(x, y, { top : size});
                         }
                         //bottom
-                        if (y === 15) {
+                        if (y === 14) {
                             PS.border(x, y, { bottom : size});
                         }
                         //left
@@ -136,8 +202,36 @@ const G = (function() {
                 }
             }
 
-            //start game
-            G.start();
+            //reset fading
+            PS.fade(PS.ALL, PS.ALL, PS.DEFAULT);
+
+            //telemetry initialization
+            if ( db ) {
+                db = PS.dbInit( db, { login : finalize } );
+                if ( db === PS.ERROR ) {
+                    db = null;
+                }
+            }
+            else {
+                finalize();
+            }
+
+        },
+
+        /*=========================Hide Board=========================*/
+
+        hide : function () {
+            PS.gridPlane(1);
+            PS.alpha(PS.ALL, PS.ALL, 255);
+            PS.gridPlane(0);
+        },
+
+        /*=========================Show Board=========================*/
+
+        show : function () {
+            PS.gridPlane(1);
+            PS.alpha(PS.ALL, PS.ALL, 0);
+            PS.gridPlane(0);
         },
 
         /*=========================Start Screen=========================*/
@@ -164,7 +258,13 @@ const G = (function() {
 
                 //reveal border
                 if (ticks === 10) {
+                    PS.statusText("");
                     PS.borderColor(PS.ALL, PS.ALL, PS.COLOR_BLACK);
+                    PS.borderColor(PS.ALL, PS.ALL, {
+                        bottom : PS.COLOR_GRAY,
+                        left : PS.COLOR_GRAY,
+                        right : PS.COLOR_GRAY
+                    });
                 }
 
                 //start game
@@ -178,8 +278,112 @@ const G = (function() {
         /*=========================Load Next Level=========================*/
 
         nextLvl : function () {
-            //placeholder for coloring the board
-            G.color();
+            /*=========================Consts & Vars=========================*/
+            //timer
+            const timer = PS.timerStart(30, exec);
+            let ticks = 0;
+
+            const level = levels[cLvl]; //array for current level information
+
+            /*=========================Telemetry=========================*/
+            if ( db && PS.dbValid( db ) ) {
+                PS.dbEvent( db, "score", cLvl );
+            }
+            if (cLvl > levels.length || cLvl === levels.length) {
+                if ( db && PS.dbValid( db ) ) {
+                    PS.dbEvent( db, "gameover", true );
+                    PS.dbSend( db, "bmoriarty", { discard : true } );
+                    db = null;
+                }
+                PS.statusText("Thanks for Playing!");
+                return;
+            }
+
+            /*=========================Level Pre-Loading=========================*/
+            //check level type and perform appropriate pre-loading
+            //draw on the bottom plane
+            PS.gridPlane(0);
+
+            switch (level[0]) {
+
+                case DRAG :
+                    G.drag(level);
+                    break;
+                case CATCH :
+                    G.pCatch(level);
+                    break;
+                case REMEMBER :
+                    G.remember(level);
+                    break;
+            }
+
+            /*=========================Level Playing Code=========================*/
+            function exec() {
+                ticks++;
+                switch (ticks) {
+                    //display level instructions
+                    case 1 :
+                        PS.statusText(level[1]);
+                        break;
+
+                        //reveal board
+                    case 2 :
+                        PS.gridPlane(1);
+                        PS.alpha(PS.ALL, PS.ALL, 0);
+                        PS.gridPlane(0);
+                        active = true;
+                        G.startTimer();
+
+                }
+            }
+
+            G.color(); //placeholder for coloring the board
+            cLvl++; //make sure next level is loaded
+        },
+
+        /*=========================Pre-loading Functions=========================*/
+        /*set up data associations draw path to trace
+        LEAVE MOUSE CHECKING FOR PS.ENTER EVENT HANDLER
+         */
+        drag : function (level) {
+            PS.gridPlane(0);
+            if (level[INVERT]) {
+
+            }
+            else {
+                for (let y = 0; y < HEIGHT; y++) {
+                    for (let x = 0; x < WIDTH; x++) {
+                        switch (level[GRID][y][x]) {
+                            case 1 :
+                                PS.data(x, y, { isPath : true});
+                                PS.color(x, y, PS.COLOR_GRAY_LIGHT);
+                                break;
+
+                            case 2 :
+                                PS.data(x, y, { isPath : true});
+                                PS.color(x, y, PS.COLOR_WHITE);
+                                break;
+
+                            case 3 :
+                                PS.data(x, y, { isPath : true});
+                                PS.color(x, y, PS.COLOR_GRAY_DARK);
+                                break;
+
+                            default :
+                                PS.data(x, y, { isPath : false});
+                                PS.color(x, y, PS.COLOR_BLACK);
+                        }
+                    }
+                }
+            }
+        },
+
+        pCatch : function(level) {
+
+        },
+
+        remember : function(level) {
+
         },
 
         /*=========================PLACEHOLDER: Colorize Level=========================*/
@@ -188,12 +392,8 @@ const G = (function() {
         },
 
         /*=========================Timer Function=========================*/
-
+        //ticks bottom timer bar to show how long player has left
         startTimer: function (time) {
-            PS.border(PS.ALL, 15, {
-                left: 0,
-                right: 0
-            });
 
             let width = 1;
             let alpha = 255;
@@ -221,13 +421,30 @@ const G = (function() {
             }
         },
 
+        /*=========================Shutdown Protocol=========================*/
+        shutdown : function() {
+                if ( db && PS.dbValid( db ) ) {
+                    PS.dbEvent( db, "shutdown", true );
+                    PS.dbSend( db, "bmoriarty", { discard : true } );
+                }
+        },
+
+        /*=========================Touch Function=========================*/
+        touch : function() {
+            if (active) {
+
+            }
+        }
     };
 
     return exports;
 
 } () );
 
+/*=========================External Event Handlers=========================*/
 PS.init = G.init;
+
+PS.shutdown = G.shutdown;
 	// Uncomment the following code line to verify operation:
 
 	// PS.debug( "PS.init() called\n" );
