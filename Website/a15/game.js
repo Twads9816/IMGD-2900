@@ -342,7 +342,8 @@ const G = (function() {
         LEAVE MOUSE CHECKING FOR PS.ENTER EVENT HANDLER
          */
         drag : function (level) {
-
+            //set controls
+            G.control(DRAG);
 
             //placeholder for inverting level
             if (level[INVERT]) {
@@ -351,6 +352,13 @@ const G = (function() {
             else {
                 for (let y = 0; y < HEIGHT; y++) {
                     for (let x = 0; x < WIDTH; x++) {
+                        //defaults
+                        PS.data(x, y, {
+                            isPath : false,
+                            isStart : false,
+                            isFinish : false
+                        });
+                        PS.color(x, y, PS.COLOR_BLACK);
                         switch (level[GRID][y][x]) {
                             case 1 :
                                 PS.data(x, y, { isPath : true});
@@ -358,18 +366,19 @@ const G = (function() {
                                 break;
 
                             case 2 :
-                                PS.data(x, y, { isPath : true});
+                                PS.data(x, y, {
+                                    isPath : true,
+                                    isStart : true
+                                });
                                 PS.color(x, y, PS.COLOR_WHITE);
                                 break;
 
                             case 3 :
-                                PS.data(x, y, { isPath : true});
+                                PS.data(x, y, {
+                                    isPath : true,
+                                    isFinish : true});
                                 PS.color(x, y, PS.COLOR_GRAY_DARK);
                                 break;
-
-                            default :
-                                PS.data(x, y, { isPath : false});
-                                PS.color(x, y, PS.COLOR_BLACK);
                         }
                     }
                 }
@@ -411,6 +420,31 @@ const G = (function() {
                 PS.debug("Border width: " + PS.border(x, 15, width) + "\n");
                 PS.debug("Minimum bead size :" + PS.minimum(x, 15) + "\n");
                 width++;
+            }
+        },
+
+        /*=========================Set Controls=========================*/
+        //changes controls based on level type passed in as parameter
+        control : function(lvlType) {
+            //first reset all controls
+            if (lvlType === DRAG) {
+                PS.touch = function(x, y, data) {
+                    if(!data.isPath) {
+                        PS.audioPlay(FAIL);
+                    }
+                };
+                PS.enter = function(x, y, data) {
+                    if(data.isPath) {
+
+                    }
+                    //PS.debug("Entered " + x + " " + y + "\n");
+                };
+            }
+            if (lvlType === CATCH) {
+
+            }
+            if (lvlType === REMEMBER) {
+
             }
         },
 
