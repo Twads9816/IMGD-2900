@@ -232,7 +232,7 @@ const G = (function() {
         },
 
         /*=========================Show Board=========================*/
-        //make grid plane 1 transparent
+        //make top grid plane transparent
         show : function () {
             PS.gridPlane(3);
             PS.alpha(PS.ALL, PS.ALL, 0);
@@ -313,8 +313,8 @@ const G = (function() {
             PS.alpha(PS.ALL, PS.ALL, 0);
             PS.gridPlane(0);
 
-            //hide grid before preloading
-            G.hide();
+            //reset timer bar
+            PS.border(PS.ALL, 15, 0);
 
             switch (level[0]) {
 
@@ -343,15 +343,13 @@ const G = (function() {
                         //reveal grid
                         G.show();
                         //allow input
+                        //set controls
+                        G.control(DRAG);
                         active = true;
                         G.startTimer();
                         break;
 
                 }
-            }
-            //stop internal timer if level completed
-            if (success) {
-                PS.timerStop(timer);
             }
             G.color(); //placeholder for coloring the board
         },
@@ -361,8 +359,6 @@ const G = (function() {
         LEAVE MOUSE CHECKING FOR PS.ENTER EVENT HANDLER
          */
         drag : function (level) {
-            //set controls
-            G.control(DRAG);
 
             //placeholder for inverting level
             if (level[INVERT]) {
@@ -456,68 +452,94 @@ const G = (function() {
         /*=========================Set Controls=========================*/
         //changes controls based on level type passed in as parameter
         control : function(lvlType) {
-            //first reset all controls
-            if (lvlType === DRAG) {
-                PS.touch = function(x, y, data) {
-                    if(!data.isStart) {
-                        PS.audioPlay(FAIL);
-                    }
-                    else if(data.isStart) {
-                        drag = true;
-                    }
-                    PS.debug("Touched: " + x + " " + y + "\n");
-                };
-                PS.enter = function(x, y, data) {
-                    if (drag) {
-                        //enter a path bead while dragging changes color as feedback
-                        if(data.isPath) {
-                            PS.gridPlane(2);
-                            PS.alpha(x, y, 255);
-                            PS.gridPlane(0);
-                            //reach end
-                            if(data.isFinish) {
-                                G.success();
+            //ASSUME: deactivation beforehand
+            switch (lvlType) {
+                case DRAG :
+                    PS.touch = function(x, y, data) {
+                        if(!data.isStart) {
+                            PS.audioPlay(FAIL);
+                        }
+                        else if(data.isStart) {
+                            drag = true;
+                        }
+                        PS.debug("Touched: " + x + " " + y + "\n");
+                    };
+                    PS.enter = function(x, y, data) {
+                        if (drag) {
+                            //enter a path bead while dragging changes color as feedback
+                            if(data.isPath) {
+                                PS.gridPlane(2);
+                                PS.alpha(x, y, 255);
+                                PS.gridPlane(0);
+                                //reach end
+                                if(data.isFinish) {
+                                    G.success();
+                                }
+                            }
+                            //entering non-path bead while dragging resets color as feedback
+                            else {
+                                PS.audioPlay(FAIL);
+                                drag = false;
+                                G.wipe();
+
                             }
                         }
-                        //entering non-path bead while dragging resets color as feedback
-                        else {
-                            PS.audioPlay(FAIL);
+                        //PS.debug("Entered: " + x + " " + y + "\n");
+                    };
+                    PS.release = function() {
+                        if (drag) {
                             drag = false;
-                            PS.gridPlane(2);
-                            PS.alpha(PS.ALL, PS.ALL, 0);
-                            PS.gridPlane(0);
                         }
-                    }
-                    //PS.debug("Entered: " + x + " " + y + "\n");
-                };
-                PS.release = function() {
-                    if (drag) {
-                        drag = false;
-                    }
-                }
-            }
-            if (lvlType === CATCH) {
+                        //clear grid of traversed beads
+                        G.wipe();
+                    };
+                    break;
 
-            }
-            if (lvlType === REMEMBER) {
+                case CATCH :
 
+                    break;
+                case REMEMBER :
+
+                    break;
             }
+        },
+
+        /*=========================Wipe Grid=========================*/
+        //wipes traversed grids during the drag game
+        wipe : function() {
+            PS.gridPlane(2);
+            PS.alpha(PS.ALL, PS.ALL, 0);
+            PS.gridPlane(0);
         },
 
         /*=========================Success=========================*/
         //deactivate controls and stop game timer
         success : function() {
+            //set timer
+            const timer = PS.timerStart(30, exec);
+            let ticks = 0;
+
             //play success noise
             PS.audioPlay(SUCCESS);
-
-            //set success flag
-            success = true;
 
             //deactivate controls
             G.deactivate();
 
             //stop game timer
             PS.timerStop(Gtimer);
+
+            function exec() {
+                ticks++;
+                switch (ticks) {
+                    case 2 :
+                        //next level
+                        G.nextLvl();
+                        break;
+
+                    case 3 :
+
+                }
+            }
         },
 
         /*=========================End Game=========================*/
@@ -530,11 +552,12 @@ const G = (function() {
             function exec() {
                 ticks++;
                 switch (ticks) {
-                    case 1 :
+                    case 2 :
                         PS.statusText(PS.DEFAULT);
+                        G.hide();
                         break;
 
-                    case 3 :
+                    case 4 :
                         PS.statusText("Score: " + cLvl);
                         break;
 
@@ -547,9 +570,8 @@ const G = (function() {
                         PS.touch = function(x, y, data, options) {
                             cLvl = -1;
                             G.nextLvl();
-                        }
-
-
+                        };
+                        break;
                 }
             }
         },
@@ -564,22 +586,13 @@ const G = (function() {
             G.end();
         },
 
-        /*=========================Touch Function=========================*/
-        touch : function() {
-            if (active) {
-
-            }
-            else {
-                PS.debug("INACTIVE");
-            }
-        },
-
         /*=========================Deactivate Controls=========================*/
         //remove functionality form controls
         deactivate : function() {
             PS.touch = function() {};
             PS.enter = function() {};
             PS.release = function() {};
+            PS.exit = function() {};
         },
 
         /*=========================Shutdown Protocol=========================*/
@@ -590,7 +603,6 @@ const G = (function() {
                     PS.dbSend( db, "bmoriarty", { discard : true } );
                 }
         },
-
     };
 
     return EXPORTS;
@@ -603,242 +615,6 @@ PS.init = G.init;
 PS.touch = G.touch;
 
 PS.shutdown = G.shutdown;
-
-	// Uncomment the following code line to verify operation:
-
-	// PS.debug( "PS.init() called\n" );
-
-	// This function should normally begin with a call to PS.gridSize( x, y )
-	// where x and y are the desired initial dimensions of the grid.
-	// Call PS.gridSize() FIRST to avoid problems!
-	// The sample call below sets the grid to the default dimensions (8 x 8).
-	// Uncomment the following code line and change the x and y parameters as needed.
-
-	// This is also a good place to display your game title or a welcome message
-	// in the status line above the grid.
-	// Uncomment the following code line and change the string parameter as needed.
-
-	//PS.statusText( "Game" );
-
-	// Add any other initialization code you need here.
-
-
-
-/*
-PS.touch ( x, y, data, options )
-Called when the mouse button is clicked on a bead, or when a bead is touched.
-It doesn't have to do anything.
-[x] = zero-based x-position of the bead on the grid.
-[y] = zero-based y-position of the bead on the grid.
-[data] = the data value assigned to this bead by a call to PS.data(); default = 0.
-[options] = an object with optional parameters; see API documentation for details.
-
-
-// Uncomment the following BLOCK to expose PS.touch() event handler:
-
-*/
-
-PS.touch = function( x, y, data, options ) {
-	// Uncomment the following code line to inspect x/y parameters:
-
-	//PS.debug( "PS.touch() @ " + x + ", " + y + "\n" );
-	PS.debug( "x = " + x + ", y =" + y + "\n" );
-
-	// Add code here for mouse clicks/touches over a bead.
-};
-
-
-/*
-PS.release ( x, y, data, options )
-Called when the mouse button is released over a bead, or when a touch is lifted off a bead
-It doesn't have to do anything
-[x] = zero-based x-position of the bead on the grid
-[y] = zero-based y-position of the bead on the grid
-[data] = the data value assigned to this bead by a call to PS.data(); default = 0.
-[options] = an object with optional parameters; see API documentation for details.
-*/
-
-// Uncomment the following BLOCK to expose PS.release() event handler:
-
-/*
-
-PS.release = function( x, y, data, options ) {
-	// Uncomment the following code line to inspect x/y parameters:
-
-	// PS.debug( "PS.release() @ " + x + ", " + y + "\n" );
-
-	// Add code here for when the mouse button/touch is released over a bead.
-};
-
-*/
-
-/*
-PS.enter ( x, y, button, data, options )
-Called when the mouse/touch enters a bead.
-It doesn't have to do anything.
-[x] = zero-based x-position of the bead on the grid.
-[y] = zero-based y-position of the bead on the grid.
-[data] = the data value assigned to this bead by a call to PS.data(); default = 0.
-[options] = an object with optional parameters; see API documentation for details.
-*/
-
-// Uncomment the following BLOCK to expose PS.enter() event handler:
-
-/*
-
-PS.enter = function( x, y, data, options ) {
-	// Uncomment the following code line to inspect x/y parameters:
-
-	// PS.debug( "PS.enter() @ " + x + ", " + y + "\n" );
-
-	// Add code here for when the mouse cursor/touch enters a bead.
-};
-
-*/
-
-/*
-PS.exit ( x, y, data, options )
-Called when the mouse cursor/touch exits a bead.
-It doesn't have to do anything.
-[x] = zero-based x-position of the bead on the grid.
-[y] = zero-based y-position of the bead on the grid.
-[data] = the data value associated with this bead, 0 if none has been set.
-[options] = an object with optional parameters; see API documentation for details.
-*/
-
-// Uncomment the following BLOCK to expose PS.exit() event handler:
-
-/*
-
-PS.exit = function( x, y, data, options ) {
-	// Uncomment the following code line to inspect x/y parameters:
-
-	// PS.debug( "PS.exit() @ " + x + ", " + y + "\n" );
-
-	// Add code here for when the mouse cursor/touch exits a bead.
-};
-
-*/
-
-/*
-PS.exitGrid ( options )
-Called when the mouse cursor/touch exits the grid perimeter.
-It doesn't have to do anything.
-[options] = an object with optional parameters; see API documentation for details.
-*/
-
-// Uncomment the following BLOCK to expose PS.exitGrid() event handler:
-
-/*
-
-PS.exitGrid = function( options ) {
-	// Uncomment the following code line to verify operation:
-
-	// PS.debug( "PS.exitGrid() called\n" );
-
-	// Add code here for when the mouse cursor/touch moves off the grid.
-};
-
-*/
-
-/*
-PS.keyDown ( key, shift, ctrl, options )
-Called when a key on the keyboard is pressed.
-It doesn't have to do anything.
-[key] = ASCII code of the pressed key, or one of the PS.KEY constants documented at:
-http://users.wpi.edu/~bmoriarty/ps/constants.html
-[shift] = true if shift key is held down, else false.
-[ctrl] = true if control key is held down, else false.
-[options] = an object with optional parameters; see API documentation for details.
-*/
-
-// Uncomment the following BLOCK to expose PS.keyDown() event handler:
-
-/*
-
-PS.keyDown = function( key, shift, ctrl, options ) {
-	// Uncomment the following code line to inspect first three parameters:
-
-	// PS.debug( "PS.keyDown(): key=" + key + ", shift=" + shift + ", ctrl=" + ctrl + "\n" );
-
-	// Add code here for when a key is pressed.
-};
-
-*/
-
-/*
-PS.keyUp ( key, shift, ctrl, options )
-Called when a key on the keyboard is released.
-It doesn't have to do anything.
-[key] = ASCII code of the pressed key, or one of the PS.KEY constants documented at:
-http://users.wpi.edu/~bmoriarty/ps/constants.html
-[shift] = true if shift key is held down, else false.
-[ctrl] = true if control key is held down, else false.
-[options] = an object with optional parameters; see API documentation for details.
-*/
-
-// Uncomment the following BLOCK to expose PS.keyUp() event handler:
-
-/*
-
-PS.keyUp = function( key, shift, ctrl, options ) {
-	// Uncomment the following code line to inspect first three parameters:
-
-	// PS.debug( "PS.keyUp(): key=" + key + ", shift=" + shift + ", ctrl=" + ctrl + "\n" );
-
-	// Add code here for when a key is released.
-};
-
-*/
-
-/*
-PS.input ( sensors, options )
-Called when an input device event (other than mouse/touch/keyboard) is detected.
-It doesn't have to do anything.
-[sensors] = an object with sensor information; see API documentation for details.
-[options] = an object with optional parameters; see API documentation for details.
-NOTE: Mouse wheel events occur ONLY when the cursor is positioned over the grid.
-*/
-
-// Uncomment the following BLOCK to expose PS.input() event handler:
-
-/*
-
-PS.input = function( sensors, options ) {
-	// Uncomment the following code lines to inspect first parameter:
-
-//	 var device = sensors.wheel; // check for scroll wheel
-//
-//	 if ( device ) {
-//	   PS.debug( "PS.input(): " + device + "\n" );
-//	 }
-
-	// Add code here for when an input event is detected.
-};
-
-*/
-
-/*
-PS.shutdown ( options )
-Called when the browser window running Perlenspiel is about to close.
-It doesn't have to do anything.
-[options] = an object with optional parameters; see API documentation for details.
-NOTE: This event is only used for applications utilizing server communication.
-*/
-
-// Uncomment the following BLOCK to expose PS.shutdown() event handler:
-
-/*
-
-PS.shutdown = function( options ) {
-	// Uncomment the following code line to verify operation:
-
-	// PS.debug( "Daisy, Daisy ...\n" );
-
-	// Add code here for when Perlenspiel is about to close.
-};
-
-*/
 
 /*
 Perlenspiel is a scheme by Professor Moriarty (bmoriarty@wpi.edu).
