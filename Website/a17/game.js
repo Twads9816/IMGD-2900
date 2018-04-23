@@ -34,7 +34,7 @@ const G = (function() {
     const WIDTH = 16, HEIGHT = 15; /*width and height of grid arrays for level loading
     16 x 15 to leave room for time bar
      */
-    const grid1 = [
+    const GRID1 = [
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -51,8 +51,8 @@ const G = (function() {
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
     ];
-    const notes1 = [];
-    const grid2 = [];
+    const NOTES1 = [];
+    const GRID2 = [];
 
     //Named Constants
     const DRAG = 1;
@@ -68,8 +68,14 @@ const G = (function() {
     //variables
     let time = 30; //progressively decreases as player progresses, giving less time to finish levels
     let score = 0; //levels completed
-    let cLvl = 0; //current level
+    let cLvl = -1; //current level
     let active = false; //flag for allowing input
+    let success = false; //flag whether level was successfully completed
+    let bgColor = PS.COLOR_GRAY;
+    let Gtimer = 0; //code of current game timer
+
+    //drag specific variables
+    let drag = false; //is the player dragging the beads?
 
     /*=========================Telemetry=========================*/
     /* The db variable below must be in scope for all game code.
@@ -93,17 +99,17 @@ const G = (function() {
     /*=========================LEVEL FLOW=========================*/
     /*edit to change level progression
     each entry contains:
-    [int levelType, string displayText, boolean invertSpecial, array forDrag&Remember
+    [int levelType, string displayText, boolean invertSpecial, levelInfo]
     */
-    const levels = [
-        [1, "Drag!", false, grid1],
-        [2, "Catch 1!", false],
-        [3, "Remember!", false, notes1],
-        [1, "Drag!", false, grid2],
-        [2, "Don't Catch!", true],
+    const LEVELS = [
+        [1, "Drag!", false, GRID1],
+        [2, "Catch 1!", false, 1],
+        [3, "Remember!", false, NOTES1],
+        [1, "Drag!", false, GRID2],
+        [2, "Don't Catch!", true, 0],
     ];
 
-    const exports = {
+    const EXPORTS = {
 
         init: function () {
             /*=========================Consts & Vars=========================*/
@@ -119,12 +125,11 @@ const G = (function() {
             PS.gridSize(16, 16);
 
             /*=============Hide Plane Below=============*/
-            PS.gridPlane(1);
+            PS.gridPlane(3);
 
             //alpha
             PS.alpha(PS.ALL, PS.ALL, 255);
-
-            PS.color(PS.ALL, PS.ALL, PS.COLOR_GRAY);
+            PS.color(PS.ALL, PS.ALL, bgColor);
 
             //move back to correct plane
             PS.gridPlane(0);
@@ -132,7 +137,7 @@ const G = (function() {
             /*==========================================*/
 
             //grid color
-            PS.gridColor(PS.COLOR_GRAY);
+            PS.gridColor(bgColor);
 
             //minimum bead size to 0
             PS.minimum(PS.ALL, 15, 0);
@@ -221,7 +226,7 @@ const G = (function() {
         /*=========================Hide Board=========================*/
         //make grid plane 1 opaque
         hide : function () {
-            PS.gridPlane(1);
+            PS.gridPlane(3);
             PS.alpha(PS.ALL, PS.ALL, 255);
             PS.gridPlane(0);
         },
@@ -229,7 +234,7 @@ const G = (function() {
         /*=========================Show Board=========================*/
         //make grid plane 1 transparent
         show : function () {
-            PS.gridPlane(1);
+            PS.gridPlane(3);
             PS.alpha(PS.ALL, PS.ALL, 0);
             PS.gridPlane(0);
         },
@@ -260,7 +265,7 @@ const G = (function() {
                 if (ticks === 10) {
                     PS.statusText("");
                     PS.borderColor(PS.ALL, PS.ALL, PS.COLOR_BLACK);
-                    PS.borderColor(PS.ALL, 15, PS.COLOR_GRAY);
+                    PS.borderColor(PS.ALL, 15, bgColor);
                 }
 
                 //start game
@@ -274,18 +279,22 @@ const G = (function() {
         /*=========================Load Next Level=========================*/
 
         nextLvl : function () {
-            /*=========================Consts & Vars=========================*/
+            /*============Consts & Vars============*/
             //timer
             const timer = PS.timerStart(30, exec);
             let ticks = 0;
 
-            const level = levels[cLvl]; //array for current level information
+            cLvl++; //make sure next level is loaded
 
-            /*=========================Telemetry=========================*/
+            const level = LEVELS[cLvl]; //array for current level information
+
+            /*============Telemetry============*/
+            //level loading send current level at telemetry info
             if ( db && PS.dbValid( db ) ) {
                 PS.dbEvent( db, "score", cLvl );
             }
-            if (cLvl > levels.length || cLvl === levels.length) {
+            //if level number is greater than amount of levels, end game and send telemetry
+            if (cLvl > LEVELS.length || cLvl === LEVELS.length) {
                 if ( db && PS.dbValid( db ) ) {
                     PS.dbEvent( db, "gameover", true );
                     PS.dbSend( db, "bmoriarty", { discard : true } );
@@ -295,10 +304,17 @@ const G = (function() {
                 return;
             }
 
-            /*=========================Level Pre-Loading=========================*/
+            /*============Level Pre-Loading============*/
             //check level type and perform appropriate pre-loading
             //draw on the bottom plane
+            //reset everything on plane 2
+            PS.gridPlane(2);
+            PS.color(PS.ALL, PS.ALL, PS.DEFAULT);
+            PS.alpha(PS.ALL, PS.ALL, 0);
             PS.gridPlane(0);
+
+            //hide grid before preloading
+            G.hide();
 
             switch (level[0]) {
 
@@ -313,7 +329,7 @@ const G = (function() {
                     break;
             }
 
-            /*=========================Level Playing Code=========================*/
+            /*============Level Playing Code============*/
             function exec() {
                 ticks++;
                 switch (ticks) {
@@ -323,6 +339,7 @@ const G = (function() {
                         break;
 
                     case 2 :
+                        PS.timerStop(timer);
                         //reveal grid
                         G.show();
                         //allow input
@@ -332,9 +349,11 @@ const G = (function() {
 
                 }
             }
-
+            //stop internal timer if level completed
+            if (success) {
+                PS.timerStop(timer);
+            }
             G.color(); //placeholder for coloring the board
-            cLvl++; //make sure next level is loaded
         },
 
         /*=========================Pre-loading Functions=========================*/
@@ -361,11 +380,13 @@ const G = (function() {
                         PS.color(x, y, PS.COLOR_BLACK);
                         switch (level[GRID][y][x]) {
                             case 1 :
+                                //path beads
                                 PS.data(x, y, { isPath : true});
                                 PS.color(x, y, PS.COLOR_GRAY_LIGHT);
                                 break;
 
                             case 2 :
+                                //starting bead
                                 PS.data(x, y, {
                                     isPath : true,
                                     isStart : true
@@ -374,6 +395,7 @@ const G = (function() {
                                 break;
 
                             case 3 :
+                                //end bead
                                 PS.data(x, y, {
                                     isPath : true,
                                     isFinish : true});
@@ -405,7 +427,8 @@ const G = (function() {
             let width = 1;
             let x = 15;
 
-            const timer = PS.timerStart(1, exec);
+            //start global timer
+            Gtimer = PS.timerStart(1, exec);
 
             function exec() {
                 if (width >= 17) {
@@ -413,14 +436,21 @@ const G = (function() {
                     width = 1;
                 }
                 if (x < 0) {
-                    PS.timerStop(timer);
+                    PS.timerStop(Gtimer);
                     G.timeOut();
                     return;
                 }
-                PS.debug("Border width: " + PS.border(x, 15, width) + "\n");
-                PS.debug("Minimum bead size :" + PS.minimum(x, 15) + "\n");
+                PS.border(x, 15, width);
+                //PS.debug("Border width: " + PS.border(x, 15) + "\n");
+                //PS.debug("Minimum bead size :" +  + "\n");
                 width++;
             }
+        },
+
+        /*=========================Restore Timer=========================*/
+        //fills white timer bar
+        restoreTimer: function () {
+            PS.border(PS.ALL, 15, 0);
         },
 
         /*=========================Set Controls=========================*/
@@ -429,16 +459,42 @@ const G = (function() {
             //first reset all controls
             if (lvlType === DRAG) {
                 PS.touch = function(x, y, data) {
-                    if(!data.isPath) {
+                    if(!data.isStart) {
                         PS.audioPlay(FAIL);
                     }
+                    else if(data.isStart) {
+                        drag = true;
+                    }
+                    PS.debug("Touched: " + x + " " + y + "\n");
                 };
                 PS.enter = function(x, y, data) {
-                    if(data.isPath) {
-
+                    if (drag) {
+                        //enter a path bead while dragging changes color as feedback
+                        if(data.isPath) {
+                            PS.gridPlane(2);
+                            PS.alpha(x, y, 255);
+                            PS.gridPlane(0);
+                            //reach end
+                            if(data.isFinish) {
+                                G.success();
+                            }
+                        }
+                        //entering non-path bead while dragging resets color as feedback
+                        else {
+                            PS.audioPlay(FAIL);
+                            drag = false;
+                            PS.gridPlane(2);
+                            PS.alpha(PS.ALL, PS.ALL, 0);
+                            PS.gridPlane(0);
+                        }
                     }
-                    //PS.debug("Entered " + x + " " + y + "\n");
+                    //PS.debug("Entered: " + x + " " + y + "\n");
                 };
+                PS.release = function() {
+                    if (drag) {
+                        drag = false;
+                    }
+                }
             }
             if (lvlType === CATCH) {
 
@@ -448,12 +504,82 @@ const G = (function() {
             }
         },
 
+        /*=========================Success=========================*/
+        //deactivate controls and stop game timer
+        success : function() {
+            //play success noise
+            PS.audioPlay(SUCCESS);
+
+            //set success flag
+            success = true;
+
+            //deactivate controls
+            G.deactivate();
+
+            //stop game timer
+            PS.timerStop(Gtimer);
+        },
+
+        /*=========================End Game=========================*/
+        //ends game completely
+        end : function() {
+            //start timer
+            const timer = PS.timerStart(30, exec);
+            let ticks = 0;
+
+            function exec() {
+                ticks++;
+                switch (ticks) {
+                    case 1 :
+                        PS.statusText(PS.DEFAULT);
+                        break;
+
+                    case 3 :
+                        PS.statusText("Score: " + cLvl);
+                        break;
+
+                    case 7 :
+                        PS.statusText(PS.DEFAULT);
+                        break;
+
+                    case 9 :
+                        PS.statusText("Again?");
+                        PS.touch = function(x, y, data, options) {
+                            cLvl = -1;
+                            G.nextLvl();
+                        }
+
+
+                }
+            }
+        },
+
         /*=========================Time Out=========================*/
         //dictates what happens when time runs out
 
         timeOut : function() {
             active = false;
+            G.deactivate();
             PS.audioPlay(TIMEOUT);
+            G.end();
+        },
+
+        /*=========================Touch Function=========================*/
+        touch : function() {
+            if (active) {
+
+            }
+            else {
+                PS.debug("INACTIVE");
+            }
+        },
+
+        /*=========================Deactivate Controls=========================*/
+        //remove functionality form controls
+        deactivate : function() {
+            PS.touch = function() {};
+            PS.enter = function() {};
+            PS.release = function() {};
         },
 
         /*=========================Shutdown Protocol=========================*/
@@ -465,18 +591,9 @@ const G = (function() {
                 }
         },
 
-        /*=========================Touch Function=========================*/
-        touch : function() {
-            if (active) {
-
-            }
-            else {
-                PS.debug("INACTIVE");
-            }
-        }
     };
 
-    return exports;
+    return EXPORTS;
 
 } () );
 
