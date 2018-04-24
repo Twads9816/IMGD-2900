@@ -70,7 +70,7 @@ const G = (function() {
     let score = 0;
 
     //set starting level
-    let cLvl = 0; //current level
+    let cLvl = 1; //current level
 
     let bgColor = PS.COLOR_GRAY;
     let Gtimer = 0; //code of current game timer
@@ -454,7 +454,68 @@ const G = (function() {
         },
 
         remember : function(level) {
-
+            //load grid
+            PS.border(PS.ALL, PS.ALL, 2);
+            //create button data accociations
+            for (let y = 0; y < 14; y++) {
+                for (let x = 0; x < 15; ) {
+                    //top left
+                    if (x > 0 && x < 5 && y < 5) {
+                        PS.data(x, y, {
+                            button : 1
+                        });
+                    }
+                    //top middle
+                    else if (x > 5 && x < 10 && y < 4) {
+                        PS.data(x, y, {
+                            button : 2
+                        });
+                    }
+                    //top right
+                    else if (x > 10 && x < 15 && y < 4) {
+                        PS.data(x, y, {
+                            button: 3
+                        });
+                    }
+                    //center left
+                    else if (x > 0 && x < 5 && y > 4 && y < 9) {
+                        PS.data(x, y, {
+                            button: 4
+                        });
+                    }
+                    //center
+                    else if (x > 5 && x < 10 && y > 4 && y < 9) {
+                        PS.data(x, y, {
+                            button: 5
+                        });
+                    }
+                    //center right
+                    else if (x > 10 && x < 15 && y > 4 && y < 9) {
+                        PS.data(x, y, {
+                            button: 6
+                        });
+                    }
+                    //bottom left
+                    else if (x > 0 && x < 5 && y > 9 && y < 14) {
+                        PS.data(x, y, {
+                            button: 7
+                        });
+                    }
+                    //bottom middle
+                    else if (x > 5 && x < 10 && y > 9 && y < 14) {
+                        PS.data(x, y, {
+                            button: 8
+                        });
+                    }
+                    //bottom right
+                    else if (x > 10 && x < 15 && y > 9 && y < 14) {
+                        PS.data(x, y, {
+                            button: 9
+                        });
+                    }
+                }
+            }
+            //iterate over data associations
         },
 
         /*=========================Colorize Level=========================*/
@@ -738,7 +799,7 @@ const G = (function() {
                         break;
 
                     case 3 :
-                        PS.statusText("Score: " + cLvl);
+                        PS.statusText("Score: " + score);
                         break;
 
                     case 6 :
