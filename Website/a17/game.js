@@ -23,7 +23,7 @@
 
 /*=========================Testing?=========================*/
 //set to true for user testing
-const test = false;
+const test = true;
 
 /*=========================Global Namespace=========================*/
 const G = (function() {
@@ -70,7 +70,7 @@ const G = (function() {
     let score = 0;
 
     //set starting level
-    let cLvl = 1; //current level
+    let cLvl = -1; //current level
 
     let bgColor = PS.COLOR_GRAY;
     let Gtimer = 0; //code of current game timer
@@ -454,6 +454,7 @@ const G = (function() {
         },
 
         remember : function(level) {
+            let but = 0;
             //load grid
             PS.border(PS.ALL, PS.ALL, 2);
             //create button data accociations
@@ -513,15 +514,22 @@ const G = (function() {
                             button: 9
                         });
                     }
+                    else {
+                        PS.data(x, y, {
+                            button : 0
+                        })
+                    }
                 }
             }
             //iterate over data associations
             for (let y = 0; y < 14; y++) {
                 for (let x = 0; x < 15;) {
-                    button = PS.data
-                    if (PS.data(x, y).button) {
+                    but = PS.data(x, y).button;
+                    if (but) {
                         PS.color(x, y, PS.COLOR_BLACK);
-                        switch (PS.data)
+                        switch (PS.data) {
+
+                        }
                     }
                 }
             }
