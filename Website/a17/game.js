@@ -516,6 +516,15 @@ const G = (function() {
                 }
             }
             //iterate over data associations
+            for (let y = 0; y < 14; y++) {
+                for (let x = 0; x < 15;) {
+                    button = PS.data
+                    if (PS.data(x, y).button) {
+                        PS.color(x, y, PS.COLOR_BLACK);
+                        switch (PS.data)
+                    }
+                }
+            }
         },
 
         /*=========================Colorize Level=========================*/
