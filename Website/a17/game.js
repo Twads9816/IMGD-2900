@@ -23,7 +23,7 @@
 
 /*=========================Testing?=========================*/
 //set to true for user testing
-const test = false;
+const test = true;
 
 /*=========================Global Namespace=========================*/
 const G = (function() {
@@ -49,10 +49,27 @@ const G = (function() {
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
     ];
     const NOTES1 = [];
-    const GRID2 = [];
+    const GRID2 = [
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 3 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+
+    ];
 
     //Named Constants
     const DRAG = 1;
@@ -70,7 +87,7 @@ const G = (function() {
     let score = 0;
 
     //set starting level
-    let cLvl = 1; //current level
+    let cLvl = -1; //current level
 
     let bgColor = PS.COLOR_GRAY;
     let Gtimer = 0; //code of current game timer
@@ -113,9 +130,9 @@ const G = (function() {
     const LEVELS = [
         [1, "Drag!", false, GRID1],
         [2, "Catch 1!", false, 1],
-        [3, "Remember!", false, NOTES1],
         [1, "Drag!", false, GRID2],
-        [2, "Don't Catch!", true, 0],
+        [3, "Remember!", false, NOTES1],
+        [2, "Don't Catch!", true, 0]
     ];
 
     const EXPORTS = {
@@ -449,18 +466,16 @@ const G = (function() {
                     collision = true;
                 }
             }
-
-
         },
 
         remember : function(level) {
+            let but = 0;
             //load grid
-            PS.border(PS.ALL, PS.ALL, 2);
             //create button data accociations
             for (let y = 0; y < 14; y++) {
-                for (let x = 0; x < 15; ) {
+                for (let x = 0; x < 15; x++) {
                     //top left
-                    if (x > 0 && x < 5 && y < 5) {
+                    if (x > 0 && x < 5 && y < 4) {
                         PS.data(x, y, {
                             button : 1
                         });
@@ -513,15 +528,22 @@ const G = (function() {
                             button: 9
                         });
                     }
+                    else {
+                        PS.data(x, y, {
+                            button : 0
+                        })
+                    }
                 }
             }
             //iterate over data associations
             for (let y = 0; y < 14; y++) {
-                for (let x = 0; x < 15;) {
-                    button = PS.data
-                    if (PS.data(x, y).button) {
+                for (let x = 0; x < 15; x++) {
+                    but = PS.data(x, y).button;
+                    if (but) {
                         PS.color(x, y, PS.COLOR_BLACK);
-                        switch (PS.data)
+                        switch (PS.data) {
+
+                        }
                     }
                 }
             }
@@ -693,7 +715,7 @@ const G = (function() {
         //controls falling beads in catch game
         fall : function() {
             //custom fall speed based on global game time
-            const fallTime = time / 2;
+            const fallTime = time / 3;
 
             const Ftimer = PS.timerStart(fallTime, exec);
             let ticks = 0;
@@ -864,10 +886,10 @@ const G = (function() {
         /*=========================Shutdown Protocol=========================*/
         //make sure to send telemetry before shutdown
         shutdown : function() {
-                if ( db && PS.dbValid( db ) ) {
-                    PS.dbEvent( db, "shutdown", true );
-                    PS.dbSend( db, "bmoriarty", { discard : true } );
-                }
+            if ( db && PS.dbValid( db ) ) {
+                PS.dbEvent( db, "shutdown", true );
+                PS.dbSend( db, "bmoriarty", { discard : true } );
+            }
         },
     };
 
