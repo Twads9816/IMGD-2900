@@ -23,7 +23,7 @@
 
 /*=========================Testing?=========================*/
 //set to true for user testing
-const test = true;
+const test = false;
 
 /*=========================Global Namespace=========================*/
 const G = (function() {
@@ -81,6 +81,9 @@ const G = (function() {
     const FAIL = "fx_rip";
     const SUCCESS = "fx_ding";
     const TIMEOUT = "fx_whistle";
+    const ALL = 0;
+    const BOARD = 1;
+    const TIME = 2;
 
     //variables
     let time = 30; //progressively decreases as player progresses, giving less time to finish levels
@@ -267,10 +270,25 @@ const G = (function() {
 
         /*=========================Show Board=========================*/
         //make top grid plane transparent
-        show : function () {
-            PS.gridPlane(3);
-            PS.alpha(PS.ALL, PS.ALL, 0);
-            PS.gridPlane(0);
+        show : function (what) {
+            switch (what) {
+                case ALL :
+                    PS.gridPlane(3);
+                    PS.alpha(PS.ALL, PS.ALL, 0);
+                    PS.gridPlane(0);
+                    break;
+                case BOARD :
+                    PS.gridPlane(3);
+                    PS.alpha(PS.ALL, PS.ALL, 0);
+                    PS.alpha(PS.ALL, 15, 255);
+                    PS.gridPlane(0);
+                    break;
+                case TIME :
+                    PS.gridPlane(3);
+                    PS.alpha(PS.ALL, 15, 0);
+                    PS.gridPlane(0);
+                    break;
+            }
         },
 
         /*=========================Start Screen=========================*/
@@ -374,10 +392,14 @@ const G = (function() {
                         PS.statusText(level[1]);
                         break;
 
-                    case 2 :
+                    case 3 :
+                        if(level[0] === REMEMBER) {
+                            G.show(BOARD);
+                            return;
+                        }
                         PS.timerStop(timer);
                         //reveal grid
-                        G.show();
+                        G.show(ALL);
 
                         //allow input
                         //set controls based on level type
@@ -385,6 +407,10 @@ const G = (function() {
 
                         //G.fall();
                         G.startTimer();
+
+                        break;
+
+                    case 4 :
 
                         break;
                 }
