@@ -68,7 +68,6 @@ const G = (function() {
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
-
     ];
 
     //Named Constants
@@ -99,8 +98,13 @@ const G = (function() {
     //drag specific variables
     let drag = false; //is the player dragging the beads?
 
-    //catch specific
-    let player = 0; //array of sprites
+    //catch specific variables
+    //array of sprites
+    let player = {
+        id : null,
+        x : null,
+        y : null
+    };
     let falling = []; //array of falling sprites
     let timeout = false; //halt falling sprites
     let collision = false; //collision flag for player and falling bead
@@ -687,7 +691,9 @@ const G = (function() {
                     PS.enter = function(x) {
                         //make sure player doesn't clip past left side
                         if (x) {
-                            PS.spriteMove(player, x);
+                            player.x = x;
+
+                            PS.spriteMove(player.id, player.x);
                         }
                     };
 
