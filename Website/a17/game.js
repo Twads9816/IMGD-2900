@@ -52,6 +52,26 @@ const G = (function() {
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
     ];
     const NOTES1 = [1, 2, 3, 4];
+    class Button {
+        constructor(xArr, yArr) {
+            this.xArr = xArr;
+            this.yArr = yArr;
+        }
+    }
+    const B1 = new Button([1, 2, 3, 4], [0, 1, 2, 3]);
+    const B2 = new Button([6, 7, 8, 9], [0, 1, 2, 3]);
+    const B3 = new Button([11, 12, 13, 14], [0, 1, 2, 3]);
+    const B4 = new Button([1, 2, 3, 4], [5, 6, 7, 8]);
+    const B5 = new Button([6, 7, 8, 9], [5, 6, 7, 8]);
+    const B6 = new Button([11, 12, 13, 14], [5, 6, 7, 8]);
+    const B7 = new Button([1, 2, 3, 4], [10, 11, 12, 13]);
+    const B8 = new Button([6, 7, 8, 9], [0, 1, 2, 3]);
+    const B9 = new Button([11, 12, 13, 14], [0, 1, 2, 3]);
+
+    const BUTTONS = [
+        B1, B2, B3, B4, B5, B6, B7, B8, B9
+    ];
+
     const GRID2 = [
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -428,17 +448,15 @@ const G = (function() {
             /*============Level Playing Code============*/
             function exec() {
                 ticks++;
+                //separate control flow for remember game
                 if(level[0] === REMEMBER) {
                     switch (ticks) {
                         case 1 :
                             PS.statusText(level[1]);
-                            break;
-
-                        case 3 :
                             G.show(BOARD);
                             break;
 
-                        case 4 :
+                        case 2 :
                             G.playArray(level[3]);
                             PS.timerStop(timer);
                             break;
@@ -762,7 +780,13 @@ const G = (function() {
                     break;
 
                 case REMEMBER :
+                    let array = LEVELS[cLvl][3];
+                    //attempt note clicked
+                    PS.touch = function(x, y, data) {
+                        if (data.button === array[cPoc]) {
 
+                        }
+                    };
                     break;
             }
         },
@@ -775,14 +799,16 @@ const G = (function() {
           let pos =0;
 
           function exec() {
+              ticks++;
+
               if (pos === array.length) {
                   PS.timerStop(timer);
+                  G.wipe();
                   G.show(TIME);
                   G.startTimer();
-                  G.repeat();
+                  G.repeat(array);
                   return;
               }
-              ticks++;
               G.play(array[pos]);
               pos++;
           }
@@ -790,18 +816,36 @@ const G = (function() {
         },
 
         /*=========================Repeat Notes Game=========================*/
+        //allow player to play game
+        repeat : function(array) {
+            let cPos = 0;
+            while (cPos != array.length) {
 
-        repeat : function() {
+            }
 
         },
 
         /*=========================Play Note=========================*/
-        //play a button given a button to play
-
+        //play a sound and color a button given a button to play
         play : function(note) {
 
+            G.colorButton(note);
             PS.audioPlay(PIANO[note - 1]);
 
+        },
+
+        /*=========================Button Play=========================*/
+        //color effect a given note
+        colorButton : function(note) {
+            const button = BUTTONS[note - 1];
+            //use grid plane 2 for easier reset
+            PS.gridPlane(2);
+            for (let y of button.yArr) {
+                for (let x of button.xArr) {
+                    PS.alpha(x, y, 255);
+                }
+            }
+            PS.gridPlane(0);
         },
 
         /*=========================Drop Beads=========================*/
@@ -884,7 +928,7 @@ const G = (function() {
         },
 
         /*=========================Wipe Grid=========================*/
-        //wipes traversed grids during the drag game
+        //wipes drag || remember game beads
         wipe : function() {
 
             PS.gridPlane(2);
