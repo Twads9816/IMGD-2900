@@ -51,7 +51,7 @@ const G = (function() {
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
     ];
-    const NOTES1 = [];
+    const NOTES1 = [1, 2, 3, 4];
     const GRID2 = [
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -70,6 +70,20 @@ const G = (function() {
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
     ];
 
+    //string arrays for audio loading
+    //c major pentatonic scale
+    const PIANO = [
+        "piano_c4",
+        "piano_d4",
+        "piano_e4",
+        "piano_g4",
+        "piano_a5",
+        "piano_c5",
+        "piano_d5",
+        "piano_e5",
+        "piano_g5"
+    ];
+
     //Named Constants
     const DRAG = 1;
     const CATCH = 2;
@@ -80,6 +94,8 @@ const G = (function() {
     const FAIL = "fx_rip";
     const SUCCESS = "fx_ding";
     const TIMEOUT = "fx_whistle";
+
+    //G.show()
     const ALL = 0;
     const BOARD = 1;
     const TIME = 2;
@@ -89,7 +105,7 @@ const G = (function() {
     let score = 0;
 
     //set starting level
-    let cLvl = -1; //current level
+    let cLvl = 2; //current level
 
     let bgColor = PS.COLOR_GRAY;
     let Gtimer = 0; //code of current game timer
@@ -107,8 +123,10 @@ const G = (function() {
     };
     let falling = []; //array of falling sprites
     let timeout = false; //halt falling sprites
-    let collision = false; //collision flag for player and falling bead
     let caught = 0; //remembers amount of caught beads
+
+    //remember specific vars
+    let cPos = 0; //current porition in note array
 
     /*=========================Telemetry=========================*/
     /* The db variable below must be in scope for all game code.
@@ -150,12 +168,15 @@ const G = (function() {
 
             /*=========================Audio Loading=========================*/
             //load fx
+            //sfx
             PS.audioLoad(FAIL);
             PS.audioLoad(SUCCESS);
             PS.audioLoad(TIMEOUT);
-
+            //notes
+            for (let s of PIANO) {
+                PS.audioLoad(s);
+            }
             //load music
-
 
             /*=========================Initial Appearance=========================*/
             //size [MUST BE FIRST]
@@ -368,6 +389,23 @@ const G = (function() {
             //reset everything on plane 2
             G.wipe();
 
+            //delete any sprites
+            for (let s of falling) {
+                PS.spriteDelete(s.id);
+            }
+            falling = [];
+            //delete player sprite
+            if (player.id) {
+                PS.spriteDelete(player.id);
+                player.id = 0;
+            }
+
+            //reset timeout
+            timeout = false;
+
+            //reset caught
+            caught = 0;
+
             //hide grid before pre-loading
             G.hide();
 
@@ -390,6 +428,23 @@ const G = (function() {
             /*============Level Playing Code============*/
             function exec() {
                 ticks++;
+                if(level[0] === REMEMBER) {
+                    switch (ticks) {
+                        case 1 :
+                            PS.statusText(level[1]);
+                            break;
+
+                        case 3 :
+                            G.show(BOARD);
+                            break;
+
+                        case 4 :
+                            G.playArray(level[3]);
+                            PS.timerStop(timer);
+                            break;
+                    }
+                    return;
+                }
                 switch (ticks) {
                     //display level instructions
                     case 1 :
@@ -397,10 +452,7 @@ const G = (function() {
                         break;
 
                     case 3 :
-                        if(level[0] === REMEMBER) {
-                            G.show(BOARD);
-                            return;
-                        }
+
                         PS.timerStop(timer);
                         //reveal grid
                         G.show(ALL);
@@ -480,15 +532,17 @@ const G = (function() {
             }
 
             //create sprite for player
-            player = PS.spriteSolid(2, 1);
+            player.id = PS.spriteSolid(2, 1);
 
             //set axis to center
-            PS.spriteAxis(player, 1);
+            PS.spriteAxis(player.id, 1);
 
             //initial position
-            PS.spriteMove(player, 8, 14);
+            player.x = 8;
+            player.y = 14;
+            PS.spriteMove(player.id, player.x, player.y);
 
-            //collision behavior for player
+            /*collision behavior for player
             PS.spriteCollide(player, collide);
 
             function collide(s1, p1, s2, p2, type) {
@@ -496,6 +550,7 @@ const G = (function() {
                     collision = true;
                 }
             }
+            */
         },
 
         remember : function(level) {
@@ -507,60 +562,69 @@ const G = (function() {
                     //top left
                     if (x > 0 && x < 5 && y < 4) {
                         PS.data(x, y, {
-                            button : 1
+                            button : 1,
+                            note : PIANO[0]
                         });
                     }
                     //top middle
                     else if (x > 5 && x < 10 && y < 4) {
                         PS.data(x, y, {
-                            button : 2
+                            button : 2,
+                            note : PIANO[1]
                         });
                     }
                     //top right
                     else if (x > 10 && x < 15 && y < 4) {
                         PS.data(x, y, {
-                            button: 3
+                            button: 3,
+                            note : PIANO[2]
                         });
                     }
                     //center left
                     else if (x > 0 && x < 5 && y > 4 && y < 9) {
                         PS.data(x, y, {
-                            button: 4
+                            button: 4,
+                            note : PIANO[3]
                         });
                     }
                     //center
                     else if (x > 5 && x < 10 && y > 4 && y < 9) {
                         PS.data(x, y, {
-                            button: 5
+                            button: 5,
+                            note : PIANO[4]
                         });
                     }
                     //center right
                     else if (x > 10 && x < 15 && y > 4 && y < 9) {
                         PS.data(x, y, {
-                            button: 6
+                            button: 6,
+                            note : PIANO[5]
                         });
                     }
                     //bottom left
                     else if (x > 0 && x < 5 && y > 9 && y < 14) {
                         PS.data(x, y, {
-                            button: 7
+                            button: 7,
+                            note : PIANO[6]
                         });
                     }
                     //bottom middle
                     else if (x > 5 && x < 10 && y > 9 && y < 14) {
                         PS.data(x, y, {
-                            button: 8
+                            button: 8,
+                            note : PIANO[7]
                         });
                     }
                     //bottom right
                     else if (x > 10 && x < 15 && y > 9 && y < 14) {
                         PS.data(x, y, {
-                            button: 9
+                            button: 9,
+                            note : PIANO[8]
                         });
                     }
                     else {
                         PS.data(x, y, {
-                            button : 0
+                            button : 0,
                         })
                     }
                 }
@@ -582,16 +646,7 @@ const G = (function() {
         /*=========================Colorize Level=========================*/
 
         color : function () {
-            //delete any sprites
-            for (let s of falling) {
-                PS.spriteDelete(s.id);
-            }
-            falling = [];
-            //delete player sprite
-            if (player) {
-                PS.spriteDelete(player);
-                player = 0;
-            }
+
             //clear background color MUST COME FIRST
             PS.color(PS.ALL, PS.ALL, bgColor);
             PS.alpha(PS.ALL, PS.ALL, PS.ALPHA_OPAQUE);
@@ -687,6 +742,10 @@ const G = (function() {
                     break;
 
                 case CATCH :
+                    //fall timer & drop time separate
+                    const fallTime = time / 3;
+                    const dropTime = time;
+
                     //make sprite follow mouse
                     PS.enter = function(x) {
                         //make sure player doesn't clip past left side
@@ -698,8 +757,8 @@ const G = (function() {
                     };
 
                     //begin dropping beads
-                    G.drop();
-                    G.fall();
+                    G.drop(dropTime);
+                    G.fall(fallTime);
                     break;
 
                 case REMEMBER :
@@ -708,62 +767,87 @@ const G = (function() {
             }
         },
 
+        /*=========================Play Note=========================*/
+
+        playArray : function(array) {
+          const timer = PS.timerStart(30, exec);
+          let ticks = 0;
+          let pos =0;
+
+          function exec() {
+              if (pos === array.length) {
+                  PS.timerStop(timer);
+                  G.show(TIME);
+                  G.startTimer();
+                  G.repeat();
+                  return;
+              }
+              ticks++;
+              G.play(array[pos]);
+              pos++;
+          }
+
+        },
+
+        /*=========================Repeat Notes Game=========================*/
+
+        repeat : function() {
+
+        },
+
+        /*=========================Play Note=========================*/
+        //play a button given a button to play
+
+        play : function(note) {
+
+            PS.audioPlay(PIANO[note - 1]);
+
+        },
+
         /*=========================Drop Beads=========================*/
         //generates and drops sprites from the top of the screen
-        drop : function() {
+        drop : function(dTime) {
             //start timer
-            const timer = PS.timerStart(30, exec);
+            const timer = PS.timerStart(dTime, exec);
             let ticks = 0;
 
             function exec() {
-                if (caught === LEVELS[cLvl][3]) {
-                    PS.timerStop(timer);
-                    return;
-                }
-                if (timeout) {
-                    PS.timerStop(timer);
-                    return;
-                }
                 ticks++;
+                if (caught === LEVELS[cLvl][3] || timeout) {
+                    PS.timerStop(timer);
+                    return;
+                }
                 //generate sprite in top row of the grid
-                let newFall = PS.spriteSolid(1, 1);
-                PS.spritePlane(newFall);
-                let xPos = (PS.random(16) - 1);
-                PS.spriteMove(newFall, xPos, 0);
-
                 //store new sprite as obj in array of falling sprites
                 let newSprite = {
-                    id : newFall,
-                    x : xPos,
+                    id : PS.spriteSolid(1, 1),
+                    x : (PS.random(16) - 1),
                     y : 0,
                     fall : false,
-                    collide : false
                 };
+                PS.spritePlane(newSprite.id, 1);
+                PS.spriteMove(newSprite.id, newSprite.x, newSprite.y);
+
                 falling.push(newSprite);
             }
         },
 
         /*=========================Fall=========================*/
         //controls falling beads in catch game
-        fall : function() {
+        fall : function(fTime) {
             //custom fall speed based on global game time
-            const fallTime = time / 3;
 
-            const Ftimer = PS.timerStart(fallTime, exec);
+            const timer = PS.timerStart(fTime, exec);
             let ticks = 0;
 
             function exec() {
-                //check if enough caught
-                if (caught === LEVELS[cLvl][3]) {
-                    PS.timerStop(Ftimer);
-                    G.success();
-                }
+                ticks++;
+
                 //check if timer is out before falling
                 if (timeout) {
-                    PS.timerStop(Ftimer);
+                    PS.timerStop(timer);
                     return;
                 }
-                ticks++;
                 //check if there are any falling sprites
                 if (falling.length) {
                     for (let i = 0; i < falling.length; i++) {
@@ -771,19 +855,20 @@ const G = (function() {
                             falling[i].fall = true;
                             return;
                         }
-                        if (collision) {
-                            //caught 1
-                            caught++;
-                            //delete it
-                            PS.spriteDelete(falling[0].id);
+                        else if (falling[i].y === 13 && (falling[i].x === player.x || falling[i].x === player.x - 1)) {
+                            PS.spriteDelete(falling[i].id);
                             //and remove it from the array of falling sprites
-                            falling.splice(0, 1);
-                            collision = false;
+                            falling.splice(i, 1);
                             --i;
+                            caught++;
+                            //check if enough caught
+                            if (caught === LEVELS[cLvl][3]) {
+                                PS.timerStop(timer);
+                                G.success();
+                            }
                         }
                         //if a sprite is below the bottom row of the grid,
-                        if (falling[i].y >= 14) {
-
+                        else if (falling[i].y >= 14) {
                             //delete it
                             PS.spriteDelete(falling[i].id);
                             //and remove it from the array of falling sprites
@@ -801,15 +886,11 @@ const G = (function() {
         /*=========================Wipe Grid=========================*/
         //wipes traversed grids during the drag game
         wipe : function() {
+
             PS.gridPlane(2);
             PS.alpha(PS.ALL, PS.ALL, 0);
             PS.gridPlane(0);
 
-            //reset timeout
-            timeout = false;
-
-            //reset caught
-            caught = 0;
         },
 
         /*=========================Success=========================*/
@@ -873,7 +954,7 @@ const G = (function() {
                         //stop timer
                         PS.timerStop(timer);
 
-                        PS.statusText("Again?");
+                        PS.statusText("Try Again?");
 
                         PS.touch = function(x, y, data, options) {
                             //immediately remove functionality from touch
