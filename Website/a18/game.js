@@ -23,7 +23,9 @@
 
 /*=========================Testing?=========================*/
 //set to true for user testing
-const test = false;
+const TEST = true;
+//play music?
+const MUSIC = false;
 
 /*=========================Global Namespace=========================*/
 const G = (function() {
@@ -73,6 +75,24 @@ const G = (function() {
     ];
 
     const GRID2 = [
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 3 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+    ];
+
+    const GRID3 = [
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -161,7 +181,7 @@ const G = (function() {
     let db = null;
 
     //if testing, set to game name
-    if (test) {
+    if (TEST) {
         db = "PerlenWare"
     }
 
@@ -200,11 +220,11 @@ const G = (function() {
                 PS.audioLoad(s);
             }
             //load music
-            PS.audioLoad("Pixelland", {
-                autoplay : true,
-                loop : true,
-                path : "resources/perlenware/"
-            });
+            if (MUSIC) {
+                PS.audioLoad("Pixelland", {
+                    path : "resources/perlenware/"
+                });
+            }
 
             /*=========================Initial Appearance=========================*/
             //size [MUST BE FIRST]
@@ -212,7 +232,7 @@ const G = (function() {
 
             /*=============Initialize hiding plane=============*/
             //use upper plane to hide layers below during level transitions
-            PS.gridPlane(3);
+            PS.gridPlane(4);
 
             //alpha
             PS.alpha(PS.ALL, PS.ALL, 255);
@@ -318,7 +338,7 @@ const G = (function() {
         /*=========================Hide Board=========================*/
         //make grid plane 1 opaque
         hide : function () {
-            PS.gridPlane(3);
+            PS.gridPlane(4);
             PS.alpha(PS.ALL, PS.ALL, 255);
             PS.gridPlane(0);
         },
@@ -328,18 +348,18 @@ const G = (function() {
         show : function (what) {
             switch (what) {
                 case ALL :
-                    PS.gridPlane(3);
+                    PS.gridPlane(4);
                     PS.alpha(PS.ALL, PS.ALL, 0);
                     PS.gridPlane(0);
                     break;
                 case BOARD :
-                    PS.gridPlane(3);
+                    PS.gridPlane(4);
                     PS.alpha(PS.ALL, PS.ALL, 0);
                     PS.alpha(PS.ALL, 15, 255);
                     PS.gridPlane(0);
                     break;
                 case TIME :
-                    PS.gridPlane(3);
+                    PS.gridPlane(4);
                     PS.alpha(PS.ALL, 15, 0);
                     PS.gridPlane(0);
                     break;
@@ -377,6 +397,11 @@ const G = (function() {
 
                 //start game
                 if (ticks === 12) {
+                    if (MUSIC) {
+                        PS.audioPlay("Pixelland", {
+                            loop : true
+                        });
+                    }
                     PS.timerStop(timer);
                     G.nextLvl();
                 }
@@ -573,8 +598,12 @@ const G = (function() {
 
             }
 
+            PS.color(PS.ALL, PS.ALL, 0x3E9244);
+            PS.color(PS.ALL, 15, PS.COLOR_WHITE);
             //create sprite for player
             player.id = PS.spriteSolid(2, 1);
+            PS.spriteSolidColor(player.id, 0x651864);
+            PS.spritePlane(player.id, 3);
 
             //set axis to center
             PS.spriteAxis(player.id, 1);
@@ -663,14 +692,14 @@ const G = (function() {
                 }
             }
             //iterate over data associations
-            for (let y = 0; y < 14; y++) {
-                for (let x = 0; x < 15; x++) {
+            for (let y = 0; y < 15; y++) {
+                for (let x = 0; x < 16; x++) {
                     but = PS.data(x, y).button;
                     if (but) {
-                        PS.color(x, y, PS.COLOR_BLACK);
-                        switch (PS.data) {
+                        PS.color(x, y, 0xD2942A);
 
-                        }
+                    } else {
+                        PS.color(x, y, 0x3B0A4E);
                     }
                 }
             }
@@ -806,13 +835,17 @@ const G = (function() {
                         if (data.button === array[cPos]) {
                             G.play(array[cPos]);
                             cPos++;
+                        } else if (data.button) {
+                            PS.audioPlay(FAIL);
                         }
                         if (cPos === array.length) {
                             G.deactivate();
+                            PS.timerStop(Gtimer);
+                            Gtimer = 0;
                             const timer = PS.timerStart(30, exec);
                             function exec() {
                                 PS.timerStop(timer);
-                                G.success()
+                                G.success();
                             }
 
                         }
@@ -862,7 +895,7 @@ const G = (function() {
             PS.gridPlane(2);
             for (let y of button.yArr) {
                 for (let x of button.xArr) {
-                    PS.alpha(x, y, 255);
+                    PS.alpha(x, y, 125);
                 }
             }
             PS.gridPlane(0);
@@ -894,6 +927,7 @@ const G = (function() {
                     y : 0,
                     fall : false,
                 };
+                PS.spriteSolidColor(newSprite.id, 0x295F67);
                 PS.spritePlane(newSprite.id, 1);
                 PS.spriteMove(newSprite.id, newSprite.x, newSprite.y);
 
@@ -974,7 +1008,9 @@ const G = (function() {
             let ticks = 0;
 
             //stop game timer
-            PS.timerStop(Gtimer);
+            if (Gtimer) {
+                PS.timerStop(Gtimer);
+            }
 
             //play success noise
             PS.audioPlay(SUCCESS);
