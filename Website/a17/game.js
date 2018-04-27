@@ -200,6 +200,11 @@ const G = (function() {
                 PS.audioLoad(s);
             }
             //load music
+            PS.audioLoad("Pixelland", {
+                autoplay : true,
+                loop : true,
+                path : "resources/perlenware/"
+            });
 
             /*=========================Initial Appearance=========================*/
             //size [MUST BE FIRST]
@@ -738,7 +743,7 @@ const G = (function() {
                             //enter a path bead while dragging changes color as feedback
                             if(data.isPath) {
                                 PS.gridPlane(2);
-                                PS.alpha(x, y, 50);
+                                PS.alpha(x, y, 75);
                                 PS.gridPlane(0);
                                 //reach end
                                 if(data.isFinish) {
