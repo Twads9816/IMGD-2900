@@ -23,7 +23,7 @@
 
 /*=========================Testing?=========================*/
 //set to true for user testing
-const TEST = true;
+const TEST = false;
 //play music?
 const MUSIC = false;
 
@@ -44,7 +44,7 @@ const G = (function() {
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-        [ 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3 ],
+        [ 0, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -53,27 +53,6 @@ const G = (function() {
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
     ];
-    const NOTES1 = [1, 2, 3, 4];
-    const NOTES2 = [2, 4, 5, 6, 7];
-    class Button {
-        constructor(xArr, yArr) {
-            this.xArr = xArr;
-            this.yArr = yArr;
-        }
-    }
-    const B1 = new Button([1, 2, 3, 4], [0, 1, 2, 3]);
-    const B2 = new Button([6, 7, 8, 9], [0, 1, 2, 3]);
-    const B3 = new Button([11, 12, 13, 14], [0, 1, 2, 3]);
-    const B4 = new Button([1, 2, 3, 4], [5, 6, 7, 8]);
-    const B5 = new Button([6, 7, 8, 9], [5, 6, 7, 8]);
-    const B6 = new Button([11, 12, 13, 14], [5, 6, 7, 8]);
-    const B7 = new Button([1, 2, 3, 4], [10, 11, 12, 13]);
-    const B8 = new Button([6, 7, 8, 9], [0, 1, 2, 3]);
-    const B9 = new Button([11, 12, 13, 14], [0, 1, 2, 3]);
-
-    const BUTTONS = [
-        B1, B2, B3, B4, B5, B6, B7, B8, B9
-    ];
 
     const GRID2 = [
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -81,10 +60,10 @@ const G = (function() {
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-        [ 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
-        [ 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 3 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 3, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -111,6 +90,65 @@ const G = (function() {
         [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
     ];
 
+    const GRID4 = [
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 1, 1, 0, 3, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+    ];
+
+    const GRID5 = [
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 3, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+    ];
+    const NOTES1 = [1, 2, 3, 4];
+    const NOTES2 = [2, 4, 5, 6, 7];
+    const NOTES3 = [1, 3, 5, 7, 9];
+    const NOTES4 = [9, 8, 7, 4, 1, 2, 3, 6];
+    class Button {
+        constructor(xArr, yArr) {
+            this.xArr = xArr;
+            this.yArr = yArr;
+        }
+    }
+    const B1 = new Button([1, 2, 3, 4], [0, 1, 2, 3]);
+    const B2 = new Button([6, 7, 8, 9], [0, 1, 2, 3]);
+    const B3 = new Button([11, 12, 13, 14], [0, 1, 2, 3]);
+    const B4 = new Button([1, 2, 3, 4], [5, 6, 7, 8]);
+    const B5 = new Button([6, 7, 8, 9], [5, 6, 7, 8]);
+    const B6 = new Button([11, 12, 13, 14], [5, 6, 7, 8]);
+    const B7 = new Button([1, 2, 3, 4], [10, 11, 12, 13]);
+    const B8 = new Button([6, 7, 8, 9], [10, 11, 12, 13]);
+    const B9 = new Button([11, 12, 13, 14], [10, 11, 12, 13]);
+
+    const BUTTONS = [
+        B1, B2, B3, B4, B5, B6, B7, B8, B9
+    ];
+
     //string arrays for audio loading
     //c major pentatonic scale
     const PIANO = [
@@ -135,6 +173,7 @@ const G = (function() {
     const FAIL = "fx_rip";
     const SUCCESS = "fx_ding";
     const TIMEOUT = "fx_whistle";
+    const CAUGHT = "fx_coin2";
 
     //G.show()
     const ALL = 0;
@@ -145,11 +184,13 @@ const G = (function() {
     let time = 30; //progressively decreases as player progresses, giving less time to finish levels
     let score = 0;
     let lives = 3;
+    let tries = 0;
     let rand = false; //sets level assortment to random
 
     //set starting level
     //start at -1
     let cLvl = -1; //current level
+    let pLvl = cLvl; //previous level
 
     const bgColor = 0x7badfc;
     let Gtimer = 0; //code of current game timer
@@ -202,9 +243,17 @@ const G = (function() {
         [1, "Drag!", false, GRID2],
         [3, "Remember!", false, NOTES1],
         [2, "Catch 2!", false, 2],
-        [1, "Drag!", false, GRID3],
         [3, "Remember!", false, NOTES2],
         [2, "Don't Catch!", true, 0],
+        [1, "Drag!", false, GRID3],
+        [2, "Catch 3!", false, 3],
+        [3, "Remember!", false, NOTES3],
+        [1, "Drag!", false, GRID4],
+        [2, "Catch 4!", false, 4],
+        [2, "Don't Catch", true, 0],
+        [1, "Drag!", false, GRID5],
+        [3, "Remember!", false, NOTES4],
+
     ];
 
     const EXPORTS = {
@@ -219,6 +268,7 @@ const G = (function() {
             PS.audioLoad(FAIL);
             PS.audioLoad(SUCCESS);
             PS.audioLoad(TIMEOUT);
+            PS.audioLoad(CAUGHT);
             //notes
             for (let s of PIANO) {
                 PS.audioLoad(s);
@@ -752,6 +802,24 @@ const G = (function() {
                 width++;
             }
         },
+        /*=========================Lose Points=========================*/
+        losePoints : function() {
+              if (pLvl === cLvl) {
+                  tries++;
+              } else {
+                  pLvl = cLvl;
+                  tries = 0;
+              }
+              switch (tries) {
+                  case 0 :
+                      score -= 3;
+                      break;
+                  case 1 :
+                      score -= 4;
+                      break;
+              }
+        },
+
 
         /*=========================Set Controls=========================*/
         //changes controls based on level type passed in as parameter
@@ -976,6 +1044,8 @@ const G = (function() {
                                 } else {
                                     G.success();
                                 }
+                            } else {
+                                PS.audioPlay(CAUGHT);
                             }
                         }
                         //if a sprite is below the bottom row of the grid,
@@ -1009,7 +1079,6 @@ const G = (function() {
         success : function() {
             //set timer
             const timer = PS.timerStart(30, exec);
-            let ticks = 0;
 
             time--;
 
@@ -1025,22 +1094,17 @@ const G = (function() {
             G.deactivate();
 
             //tick score
-            score++;
+            score += 10;
 
             function exec() {
-                ticks++;
-                switch (ticks) {
-                    case 1:
-                        PS.statusText("");
-                    case 2 :
-                        //stop timer
-                        PS.timerStop(timer);
+                PS.statusText("");
 
-                        //next level
-                        G.nextLvl();
+                //stop timer
+                PS.timerStop(timer);
 
-                        break;
-                }
+                //next level
+                G.nextLvl();
+
             }
         },
 
@@ -1087,6 +1151,8 @@ const G = (function() {
                             //reset lives
                             lives = 3;
 
+                            tries = 0;
+
                             //random level arrangement
                             rand = true;
 
@@ -1111,6 +1177,7 @@ const G = (function() {
             lives--;
             PS.audioPlay(FAIL);
             PS.timerStop(Gtimer);
+            G.losePoints();
 
             if (lives) {
                 const timer = PS.timerStart(30, exec);
@@ -1154,6 +1221,7 @@ const G = (function() {
                 G.success();
                 return;
             }
+            G.losePoints();
             lives--;
             PS.audioPlay(TIMEOUT);
             if (lives) {
