@@ -884,7 +884,7 @@ const G = (function() {
                 case CATCH :
                     //fall timer & drop time separate
                     const fallTime = time / 3;
-                    const dropTime = time;
+                    const dropTime = time / 2;
 
                     //make sprite follow mouse
                     PS.enter = function(x) {
