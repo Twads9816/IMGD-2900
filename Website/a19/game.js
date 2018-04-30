@@ -623,7 +623,8 @@ const G = (function() {
                             case 1 :
                                 //path beads
                                 PS.data(x, y, { isPath : true});
-                                PS.color(x, y, 0xF97442);
+                                PS.color(x, y, 240, 115, 58);
+                                PS.alpha(x,y,100);
                                 break;
 
                             case 2 :
@@ -632,7 +633,7 @@ const G = (function() {
                                     isPath : true,
                                     isStart : true
                                 });
-                                PS.color(x, y, 0xF99C79);
+                                PS.color(x, y, PS.COLOR_BLACK);
                                 break;
 
                             case 3 :
@@ -641,7 +642,7 @@ const G = (function() {
                                     isPath : true,
                                     isFinish : true
                                 });
-                                PS.color(x, y, 0x9A4D26);
+                                PS.color(x, y, 240, 115, 58);
                                 break;
                         }
                     }
