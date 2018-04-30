@@ -453,6 +453,7 @@ const G = (function() {
                 if (ticks === 12) {
                     if (MUSIC) {
                         PS.audioPlay("Pixelland", {
+                            loop : true,
                             path : "../resources/perlenware/"
                         });
                     }
