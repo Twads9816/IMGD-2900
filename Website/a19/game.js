@@ -208,7 +208,7 @@ const G = (function() {
 
     //set starting level
     //start at -1
-    let cLvl = 16; //current level
+    let cLvl = -1; //current level
     let pLvl = cLvl; //previous level
 
     const bgColor = 0x7badfc;
